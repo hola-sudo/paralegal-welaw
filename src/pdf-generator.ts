@@ -440,12 +440,14 @@ export async function generatePDF(options: PDFGeneratorOptions): Promise<PDFGene
     // Configurar puppeteer para entorno serverless (Vercel con @sparticuz/chromium)
     let executablePath: string;
     
-    if (process.env.VERCEL) {
-      // En Vercel, usar chromium
+    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+      // En Vercel/producción, usar chromium
       executablePath = await chromium.executablePath();
     } else {
-      // En desarrollo local, usar el chromium del sistema
-      executablePath = '/usr/bin/chromium-browser' || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+      // En desarrollo local, usar Chrome del sistema
+      executablePath = process.platform === 'darwin' 
+        ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+        : '/usr/bin/chromium-browser';
     }
     
     const browser = await puppeteer.launch({
