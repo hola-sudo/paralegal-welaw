@@ -178,6 +178,7 @@ export async function createDocumentFromTemplate(
   try {
     console.log('🚀 Creando documento directo (sin plantilla):', templateName);
     console.log('📋 Reemplazos:', Object.keys(replacements).length, 'campos');
+    console.log('🗂️ Ignorando folderId para evitar problemas de cuota');
 
     // 1. Crear nombre del nuevo documento
     const docName = newDocumentName || `${templateName.replace(' - Plantilla', '')} - ${new Date().toISOString().split('T')[0]} - ${Date.now()}`;
