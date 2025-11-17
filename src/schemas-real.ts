@@ -27,16 +27,16 @@ export type DocumentType = z.infer<typeof DocumentTypeSchema>;
  * Placeholders: {{NOMBRE_CLIENTE}}, {{RFC_cliente}}, etc.
  */
 export const ContratoBaseSchema = z.object({
-  NOMBRE_CLIENTE: z.string().describe('Nombre completo del cliente'),
-  RFC_cliente: z.string().optional().describe('RFC del cliente (opcional)'),
-  NOMBRE_EVENTO: z.string().describe('Nombre del evento (ej: Boda de María y Juan)'),
-  FECHA_EVENTO: z.string().describe('Fecha del evento en formato DD/MM/AAAA'),
-  UBICACION: z.string().describe('Ubicación donde se realizará el evento'),
-  EVENTO: z.string().describe('Descripción del tipo de evento'),
+  NOMBRE_CLIENTE: z.string().optional().default('').describe('Nombre completo del cliente'),
+  RFC_cliente: z.string().optional().default('').describe('RFC del cliente (opcional)'),
+  NOMBRE_EVENTO: z.string().optional().default('').describe('Nombre del evento (ej: Boda de María y Juan)'),
+  FECHA_EVENTO: z.string().optional().default('').describe('Fecha del evento en formato DD/MM/AAAA'),
+  UBICACION: z.string().optional().default('').describe('Ubicación donde se realizará el evento'),
+  EVENTO: z.string().optional().default('').describe('Descripción del tipo de evento'),
   // Fecha del contrato
-  "DD/MM/AAAA": z.string().describe('Fecha de firma del contrato'),
+  "DD/MM/AAAA": z.string().optional().default('').describe('Fecha de firma del contrato'),
   // Hora del evento
-  "HH:MM": z.string().optional().describe('Hora del evento')
+  "HH:MM": z.string().optional().default('').describe('Hora del evento')
 });
 
 /**
@@ -45,8 +45,8 @@ export const ContratoBaseSchema = z.object({
  */
 export const AnexoASchema = z.object({
   // Información básica
-  FECHA_EVENTO: z.string().describe('Fecha del evento'),
-  NOMBRE_CLIENTE: z.string().describe('Nombre del cliente'),
+  FECHA_EVENTO: z.string().optional().default('').describe('Fecha del evento'),
+  NOMBRE_CLIENTE: z.string().optional().default('').describe('Nombre del cliente'),
   
   // Medidas del salón
   MEDIDA_LARGO_SALON: z.string().optional().describe('Largo del salón en metros'),
@@ -135,9 +135,9 @@ export const AnexoASchema = z.object({
  * 12 campos sobre los renders a crear
  */
 export const AnexoBSchema = z.object({
-  CLIENTE: z.string().describe('Nombre del cliente'),
-  NOMBRE_EVENTO: z.string().describe('Nombre del evento'),
-  FECHA_EVENTO: z.string().describe('Fecha del evento'),
+  CLIENTE: z.string().optional().default('').describe('Nombre del cliente'),
+  NOMBRE_EVENTO: z.string().optional().default('').describe('Nombre del evento'),
+  FECHA_EVENTO: z.string().optional().default('').describe('Fecha del evento'),
   FECHA_CLIENTE: z.string().optional().describe('Fecha del cliente'),
   FECHA_PIXEL: z.string().optional().describe('Fecha de Pixel Perfection'),
   PIXEL_REPRESENTANTE: z.string().optional().describe('Representante de 3D Pixel Perfection'),
@@ -160,7 +160,7 @@ export const AnexoBSchema = z.object({
  * 24 campos para manejar hasta 7 cambios por ronda
  */
 export const AnexoCSchema = z.object({
-  NOMBRE_EVENTO: z.string().describe('Nombre del evento'),
+  NOMBRE_EVENTO: z.string().optional().default('').describe('Nombre del evento'),
   RONDA: z.string().optional().describe('Número de ronda de revisión'),
   TOTAL_CAMBIOS_RONDA: z.string().optional().describe('Total de cambios en esta ronda'),
   CLIENTE_ACEPTA_RONDA: z.string().optional().describe('¿Cliente acepta la ronda? (Sí/No)'),
@@ -207,7 +207,7 @@ export const AnexoCSchema = z.object({
  * 21 campos + lógica condicional con OPCION A/B/C/D
  */
 export const AnexoDSchema = z.object({
-  NOMBRE_EVENTO: z.string().describe('Nombre del evento'),
+  NOMBRE_EVENTO: z.string().optional().default('').describe('Nombre del evento'),
   PAQUETE: z.string().optional().describe('Tipo de paquete contratado'),
   FECHA_ENTREGA: z.string().optional().describe('Fecha de entrega final'),
   FECHA_CLIENTE: z.string().optional().describe('Fecha del cliente'),
