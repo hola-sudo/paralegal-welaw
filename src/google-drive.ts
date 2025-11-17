@@ -188,7 +188,7 @@ export async function createDocumentFromTemplate(
     const documentMetadata = {
       name: docName,
       mimeType: 'application/vnd.google-apps.document',
-      parents: [folderId], // Crear en la carpeta específica del usuario
+      // Sin parents - crear en raíz del service account para evitar problemas de permisos
     };
 
     const createResponse = await drive.files.create({
@@ -221,7 +221,18 @@ export async function createDocumentFromTemplate(
 
     console.log('✅ Contenido agregado al documento');
 
-    // 5. Generar URL del documento
+    // 5. Hacer documento público para que puedas accederlo
+    await drive.permissions.create({
+      fileId: newDocumentId,
+      requestBody: {
+        role: 'reader',
+        type: 'anyone',
+      },
+    });
+
+    console.log('✅ Documento hecho público');
+
+    // 6. Generar URL del documento
     const documentUrl = `https://docs.google.com/document/d/${newDocumentId}/edit`;
 
     return {
