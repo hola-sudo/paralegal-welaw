@@ -17,15 +17,25 @@ export default async function handler(
     return res.status(405).json({ error: 'Method not allowed. Use GET.' });
   }
 
-  // Verificar variables de entorno críticas
+  // Verificar variables de entorno críticas para Google Drive
   const envVars = {
     OPENAI_API_KEY: !!process.env.OPENAI_API_KEY,
-    MCP_ENDPOINT: !!process.env.MCP_ENDPOINT,
-    MCP_API_KEY: !!process.env.MCP_API_KEY,
+    GOOGLE_SERVICE_ACCOUNT_KEY: !!process.env.GOOGLE_SERVICE_ACCOUNT_KEY,
     DRIVE_FOLDER_ID: !!process.env.DRIVE_FOLDER_ID
   };
 
   const allConfigured = Object.values(envVars).every(Boolean);
+
+  // Verificar Google Service Account válido
+  let googleServiceAccountValid = false;
+  try {
+    if (process.env.GOOGLE_SERVICE_ACCOUNT_KEY) {
+      const serviceAccount = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
+      googleServiceAccountValid = !!(serviceAccount.type === 'service_account' && serviceAccount.client_email);
+    }
+  } catch (e) {
+    googleServiceAccountValid = false;
+  }
 
   return res.status(200).json({
     status: 'ok',
@@ -37,8 +47,8 @@ export default async function handler(
     configuration: {
       all_env_vars_configured: allConfigured,
       details: envVars,
-      mcp_endpoint_configured: !!process.env.MCP_ENDPOINT,
-      drive_integration_ready: !!(process.env.MCP_API_KEY && process.env.DRIVE_FOLDER_ID)
+      google_service_account_valid: googleServiceAccountValid,
+      drive_integration_ready: allConfigured && googleServiceAccountValid
     },
     endpoints: {
       health: {
@@ -65,9 +75,12 @@ export default async function handler(
         configured: !!process.env.OPENAI_API_KEY,
         models_used: ['gpt-4o']
       },
-      mcp_google_drive: {
-        configured: allConfigured,
-        endpoint: process.env.MCP_ENDPOINT ? 'Configured' : 'Missing'
+      google_drive_api: {
+        configured: googleServiceAccountValid,
+        service_account_email: googleServiceAccountValid ? 
+          JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY!).client_email : 'Not configured',
+        folder_id: process.env.DRIVE_FOLDER_ID || 'Not configured',
+        integration_type: 'Direct API (no MCP)'
       }
     }
   });
