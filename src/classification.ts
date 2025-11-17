@@ -12,7 +12,7 @@ import { zodResponseFormat } from 'openai/helpers/zod';
 
 // Inicializamos el cliente de OpenAI
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY as string,
 });
 
 /**

@@ -10,7 +10,7 @@ import OpenAI from 'openai';
 
 // Inicializamos el cliente de OpenAI para usar sus APIs de moderación
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY as string,
 });
 
 /**
