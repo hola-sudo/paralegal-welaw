@@ -5,7 +5,7 @@
  * listos para descarga y procesamiento por agentes externos.
  */
 
-import puppeteer from 'puppeteer-core';
+import puppeteer from 'puppeteer';
 import chromium from '@sparticuz/chromium';
 import { DocumentType } from './schemas-real';
 
@@ -437,20 +437,9 @@ export async function generatePDF(options: PDFGeneratorOptions): Promise<PDFGene
     // Generar HTML con los datos
     const htmlContent = templateFunction(options.extractedData);
 
-    // Configurar puppeteer para entorno serverless (Vercel con @sparticuz/chromium)
-    let executablePath: string;
-    
-    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
-      // En Vercel/producción, usar chromium
-      executablePath = await chromium.executablePath();
-    } else {
-      // En desarrollo local, usar Chrome del sistema
-      executablePath = process.platform === 'darwin' 
-        ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-        : '/usr/bin/chromium-browser';
-    }
-    
+    // Configurar puppeteer para entorno serverless
     const browser = await puppeteer.launch({
+      headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -459,18 +448,8 @@ export async function generatePDF(options: PDFGeneratorOptions): Promise<PDFGene
         '--single-process',
         '--no-zygote',
         '--disable-extensions',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding',
-        '--disable-features=TranslateUI',
-        '--disable-ipc-flooding-protection',
-        '--memory-pressure-off'
-      ],
-      defaultViewport: { width: 1280, height: 720 },
-      executablePath,
-      headless: true,
-      ignoreHTTPSErrors: true,
-      timeout: 30000
+        '--disable-background-timer-throttling'
+      ]
     });
 
     const page = await browser.newPage();
