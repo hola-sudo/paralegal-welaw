@@ -26,10 +26,11 @@
   "type": "commonjs",
   "dependencies": {
     "@openai/agents": "^0.3.2",
+    "chrome-aws-lambda": "^10.1.0",
     "docx": "^9.5.1",
     "googleapis": "^166.0.0",
     "openai": "^6.9.0",
-    "puppeteer": "^22.0.0",
+    "puppeteer-core": "^22.0.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

@@ -5,7 +5,8 @@
  * listos para descarga y procesamiento por agentes externos.
  */
 
-import puppeteer from 'puppeteer';
+import puppeteer from 'puppeteer-core';
+import chromium from 'chrome-aws-lambda';
 import { DocumentType } from './schemas-real';
 
 // Tipo flexible para datos extraídos (acepta cualquier estructura)
@@ -436,18 +437,13 @@ export async function generatePDF(options: PDFGeneratorOptions): Promise<PDFGene
     // Generar HTML con los datos
     const htmlContent = templateFunction(options.extractedData);
 
-    // Configurar puppeteer para entorno serverless
+    // Configurar puppeteer para entorno serverless (Vercel con chrome-aws-lambda)
     const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--no-first-run',
-        '--no-zygote',
-        '--single-process'
-      ]
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
+      ignoreHTTPSErrors: true
     });
 
     const page = await browser.newPage();
