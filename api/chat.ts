@@ -145,7 +145,7 @@ async function generateDocument(
     const googleDriveResult = await createDocumentFromTemplate(
       templateName,
       replacements,
-      DRIVE_FOLDER_ID,
+      "", // Sin folder_id para crear en raíz del service account
       `${state.documentType}_chat_${new Date().toISOString().split('T')[0]}_${Date.now()}`
     );
 
