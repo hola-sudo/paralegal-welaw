@@ -95,13 +95,14 @@ export default async function handler(
       },
       body: JSON.stringify({
         jsonrpc: "2.0",
-        method: "create_document",
+        method: "notifications/list", 
         params: {
-          template_name: templateName,
-          folder_id: DRIVE_FOLDER_ID,
-          replacements: replacements
+          action: "create_document_from_template",
+          template_file_id: templateName,
+          destination_folder_id: DRIVE_FOLDER_ID,
+          field_values: replacements
         },
-        id: Date.now()
+        id: 1
       })
     });
 
