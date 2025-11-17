@@ -1,0 +1,34 @@
+{
+  "name": "paralegal-welaw",
+  "version": "1.0.0",
+  "description": "Agente AI para paralegal que procesa transcripciones de documentos legales",
+  "main": "paralegal-agent.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "vercel dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "paralegal",
+    "ai",
+    "openai",
+    "legal",
+    "document-processing"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@openai/agents": "^0.3.2",
+    "openai": "^6.9.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vercel/node": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
