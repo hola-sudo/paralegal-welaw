@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agente Paralegal - Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            resize: vertical;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .example {
+            background: #e2e3e5;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .example:hover {
+            background: #d6d8db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Agente Paralegal - Demo</h1>
+        <p>Prueba el agente con transcripciones de documentos legales. El sistema clasificará automáticamente el tipo de documento y extraerá los datos relevantes.</p>
+        
+        <div class="example" onclick="loadExample('contrato')">
+            <strong>📄 Ejemplo: Contrato Base</strong><br>
+            Haz clic para cargar un ejemplo de contrato de servicios
+        </div>
+        
+        <div class="example" onclick="loadExample('anexo_a')">
+            <strong>📋 Ejemplo: Anexo A</strong><br>
+            Haz clic para cargar un ejemplo de anexo con términos adicionales
+        </div>
+        
+        <textarea id="transcripcion" placeholder="Pega aquí la transcripción del documento legal..."></textarea>
+        
+        <button onclick="procesarTranscripcion()" id="procesarBtn">
+            Procesar Transcripción
+        </button>
+        
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        const ejemplos = {
+            contrato: `CONTRATO DE PRESTACIÓN DE SERVICIOS
+
+Entre los suscritos:
+- PARTE 1: Empresa ABC S.A. de C.V., representada por Juan Pérez
+- PARTE 2: Consultoría XYZ S.C., representada por María González
+
+FECHA DE FIRMA: 15/03/2024
+FECHA DE INICIO: 01/04/2024
+FECHA DE VENCIMIENTO: 31/12/2024
+
+OBJETO DEL CONTRATO: Prestación de servicios de consultoría en tecnología
+MONTO TOTAL: $500,000.00 MXN
+CONDICIONES DE PAGO: Pago mensual de $41,666.67 MXN
+JURISDICCIÓN: Ciudad de México
+LEY APLICABLE: Leyes de los Estados Unidos Mexicanos`,
+
+            anexo_a: `ANEXO A - TÉRMINOS Y CONDICIONES ADICIONALES
+
+ID DEL ANEXO: ANX-A-2024-001
+REFERENCIA AL CONTRATO: CON-2024-ABC-XYZ-001
+FECHA DEL ANEXO: 20/03/2024
+
+DESCRIPCIÓN: Este anexo establece términos adicionales sobre confidencialidad y propiedad intelectual.
+
+CLÁUSULAS ADICIONALES:
+- Las partes se comprometen a mantener confidencialidad sobre los términos del contrato
+- Toda propiedad intelectual generada será propiedad de la PARTE 1
+- Se establece un período de vigencia de 2 años adicionales al contrato base
+
+VIGENCIA: Hasta el 31/12/2026
+FIRMANTES: Juan Pérez, María González`
+        };
+
+        function loadExample(tipo) {
+            document.getElementById('transcripcion').value = ejemplos[tipo];
+        }
+
+        async function procesarTranscripcion() {
+            const transcripcion = document.getElementById('transcripcion').value.trim();
+            const boton = document.getElementById('procesarBtn');
+            const resultado = document.getElementById('resultado');
+            
+            if (!transcripcion) {
+                mostrarResultado('Por favor, ingresa una transcripción', 'error');
+                return;
+            }
+            
+            boton.disabled = true;
+            boton.textContent = 'Procesando...';
+            resultado.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ transcripcion })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarResultado(`✅ ${data.resumen}
+
+📄 Tipo de documento: ${data.tipo_documento}
+🔗 Documento creado: ${data.documento_creado}
+
+📋 Datos extraídos:
+${JSON.stringify(data.datos_extraidos, null, 2)}
+
+🛡️ Verificaciones de seguridad:
+- PII warnings: ${data.guardrails.pii_warnings.length || 'Ninguna'}
+- Moderación: ${data.guardrails.moderation_passed ? 'Aprobada' : 'Bloqueada'}`, 'success');
+                } else {
+                    mostrarResultado(`❌ Error: ${data.error}
+                    
+${data.warnings ? '⚠️ Advertencias:\n' + data.warnings.join('\n') : ''}`, 'error');
+                }
+            } catch (error) {
+                mostrarResultado(`❌ Error de conexión: ${error.message}`, 'error');
+            } finally {
+                boton.disabled = false;
+                boton.textContent = 'Procesar Transcripción';
+            }
+        }
+        
+        function mostrarResultado(texto, tipo) {
+            const resultado = document.getElementById('resultado');
+            resultado.textContent = texto;
+            resultado.className = `result ${tipo}`;
+        }
+    </script>
+</body>
+</html>

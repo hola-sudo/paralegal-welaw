@@ -4,30 +4,35 @@
   "description": "Agente AI para paralegal que procesa transcripciones de documentos legales",
   "main": "paralegal-agent.ts",
   "scripts": {
-    "build": "echo 'API-only project - no build needed'",
-    "dev": "ts-node src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "dev": "ts-node example.ts",
+    "start": "node dist/example.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf dist",
+    "pre-deploy": "node scripts/pre-deploy-check.js",
+    "vercel-deploy": "npm run pre-deploy && vercel --prod"
   },
   "keywords": [
     "paralegal",
     "ai",
     "openai",
     "legal",
-    "document-processing"
+    "document-processing",
+    "mcp",
+    "vercel"
   ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
     "@openai/agents": "^0.3.2",
-    "next": "^14.0.0",
     "openai": "^6.9.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "@types/react": "^18.0.0",
-    "@vercel/node": "^3.0.0",
+    "@vercel/node": "^4.0.0",
+    "ts-node": "^10.9.0",
     "typescript": "^5.0.0"
   },
   "engines": {
