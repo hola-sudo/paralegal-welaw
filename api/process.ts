@@ -1,12 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { processTranscriptConversational } from '../src/agent-real';
 import { DocumentType } from '../src/schemas-real';
+import { createDocumentFromTemplate } from '../src/google-drive';
 
 // Validar variables de entorno requeridas
 const requiredEnvVars = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-  MCP_ENDPOINT: process.env.MCP_ENDPOINT,
-  MCP_API_KEY: process.env.MCP_API_KEY,
+  GOOGLE_SERVICE_ACCOUNT_KEY: process.env.GOOGLE_SERVICE_ACCOUNT_KEY,
   DRIVE_FOLDER_ID: process.env.DRIVE_FOLDER_ID
 };
 
@@ -19,8 +19,6 @@ if (missingVars.length > 0) {
   console.error('Missing environment variables:', missingVars.join(', '));
 }
 
-const MCP_ENDPOINT = process.env.MCP_ENDPOINT as string;
-const MCP_API_KEY = process.env.MCP_API_KEY as string;
 const DRIVE_FOLDER_ID = process.env.DRIVE_FOLDER_ID as string;
 
 export default async function handler(
@@ -81,100 +79,50 @@ export default async function handler(
       });
     }
 
-    // Preparamos los datos para MCP según el tipo de documento
+    // Preparamos los datos para Google Drive API directo
     const templateName = getTemplateName(result.tipo_documento);
-    const replacements = flattenDataForMCP(result.datos);
+    const replacements = flattenDataForGoogleDrive(result.datos);
 
-    // Llamada a MCP para crear documento en Drive
-    const mcpResponse = await fetch(MCP_ENDPOINT, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Accept": "application/json, text/event-stream", 
-        "Authorization": `Bearer ${MCP_API_KEY}` 
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        method: "tools/call",
-        params: {
-          name: "google_docs_create_document_from_template",
-          arguments: {
-            instructions: `Create a new document from template "${templateName}" with the following field replacements: ${JSON.stringify(replacements)}. Save the document to folder ID ${DRIVE_FOLDER_ID}.`,
-            title: `${result.tipo_documento}_${new Date().getFullYear()}_${Date.now()}`,
-            empty_fields_preference: "leave_blank"
-          }
-        },
-        id: 1
-      })
-    });
+    // Llamada a Google Drive API directo
+    console.log('🚀 Creando documento con Google Drive API directo...');
+    console.log('📄 Plantilla:', templateName);
+    console.log('📋 Reemplazos:', Object.keys(replacements).length, 'campos');
 
-    // Manejar Server-Sent Events (SSE) de MCP
-    let mcpResult: any = {};
-    
-    if (mcpResponse.headers.get('content-type')?.includes('text/event-stream')) {
-      // Procesar event stream
-      const responseText = await mcpResponse.text();
-      console.log('MCP SSE Response:', responseText);
-      
-      // Parsear eventos SSE
-      const events = responseText.split('\n\n').filter(Boolean);
-      for (const event of events) {
-        const lines = event.split('\n');
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const eventData = JSON.parse(line.slice(6)); // Remover "data: "
-              console.log('Parsed SSE data:', eventData);
-              
-              if (eventData.result) {
-                mcpResult = eventData.result;
-              } else if (eventData.error) {
-                mcpResult = { error: eventData.error };
-              } else {
-                mcpResult = eventData;
-              }
-            } catch (parseError) {
-              console.log('Could not parse SSE line:', line);
-            }
-          }
+    const googleDriveResult = await createDocumentFromTemplate(
+      templateName,
+      replacements,
+      DRIVE_FOLDER_ID,
+      `${result.tipo_documento}_${new Date().toISOString().split('T')[0]}_${Date.now()}`
+    );
+
+    if (!googleDriveResult.success) {
+      return res.status(500).json({
+        error: `Error al crear documento en Google Drive: ${googleDriveResult.error}`,
+        details: {
+          template: templateName,
+          folder_id: DRIVE_FOLDER_ID,
+          replacements_count: Object.keys(replacements).length
         }
-      }
-    } else {
-      // Respuesta JSON normal
-      mcpResult = await mcpResponse.json();
-    }
-
-    // Logging detallado para debugging
-    console.log('MCP Response Status:', mcpResponse.status);
-    console.log('MCP Response Headers:', Object.fromEntries(mcpResponse.headers.entries()));
-    console.log('MCP Final Result:', JSON.stringify(mcpResult, null, 2));
-
-    if (!mcpResponse.ok) {
-      return res.status(500).json({
-        error: `Error al crear documento en Google Drive: HTTP ${mcpResponse.status}`,
-        details: mcpResult,
-        mcp_response: await mcpResponse.text().catch(() => 'Could not read response text')
-      });
-    }
-
-    if (mcpResult.error) {
-      return res.status(500).json({
-        error: `Error al crear documento en Google Drive: ${JSON.stringify(mcpResult.error)}`,
-        full_response: mcpResult
       });
     }
 
     return res.status(200).json({
       success: true,
       tipo_documento: result.tipo_documento,
-      documento_creado: mcpResult.nuevo_doc_url || `https://drive.google.com/drive/folders/${DRIVE_FOLDER_ID}`,
+      documento_creado: googleDriveResult.documentUrl || `https://drive.google.com/drive/folders/${DRIVE_FOLDER_ID}`,
+      documento_id: googleDriveResult.documentId,
       datos_extraidos: result.datos,
       guardrails: {
         pii_warnings: result.guardrails.pii.warnings,
         moderation_passed: result.guardrails.moderation.passed
       },
       metadata: result.metadata,
-      resumen: `¡Documento ${result.tipo_documento} procesado y creado exitosamente en Google Drive!`
+      google_drive: {
+        template_used: templateName,
+        folder_id: DRIVE_FOLDER_ID,
+        document_created: new Date().toISOString()
+      },
+      resumen: `¡Documento ${result.tipo_documento} creado exitosamente con Google Drive API directo!`
     });
 
   } catch (error: any) {
@@ -202,9 +150,9 @@ function getTemplateName(tipo: DocumentType): string {
 }
 
 /**
- * Convierte los datos estructurados en un objeto plano para MCP
+ * Convierte los datos estructurados en un objeto plano para Google Drive
  */
-function flattenDataForMCP(datos: any): Record<string, string> {
+function flattenDataForGoogleDrive(datos: any): Record<string, string> {
   const flattened: Record<string, string> = {};
   
   function flatten(obj: any, prefix = ''): void {

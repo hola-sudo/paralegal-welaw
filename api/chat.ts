@@ -1,12 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { processUserMessage, initializeConversation, ConversationState } from '../src/agent-real';
 import { DocumentType } from '../src/schemas-real';
+import { createDocumentFromTemplate } from '../src/google-drive';
 
 // Simple in-memory storage para demo (en producción usar Redis/Database)
 const conversations = new Map<string, ConversationState>();
 
-const MCP_ENDPOINT = process.env.MCP_ENDPOINT as string;
-const MCP_API_KEY = process.env.MCP_API_KEY as string;
 const DRIVE_FOLDER_ID = process.env.DRIVE_FOLDER_ID as string;
 
 export default async function handler(
@@ -134,73 +133,24 @@ async function generateDocument(
       throw new Error('Estado incompleto para generar documento');
     }
 
-    // Preparar datos para MCP
-    const templateName = getTemplateNameForMCP(state.documentType);
-    const replacements = flattenDataForMCP(state.extractedData);
+    // Preparar datos para Google Drive API directo
+    const templateName = getTemplateNameForGoogleDrive(state.documentType);
+    const replacements = flattenDataForGoogleDrive(state.extractedData);
 
-    // Llamada a MCP
-    const mcpResponse = await fetch(MCP_ENDPOINT, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Accept": "application/json, text/event-stream", 
-        "Authorization": `Bearer ${MCP_API_KEY}` 
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        method: "tools/call",
-        params: {
-          name: "google_docs_create_document_from_template",
-          arguments: {
-            instructions: `Create a new document from template "${templateName}" with the following field replacements: ${JSON.stringify(replacements)}. Save the document to folder ID ${DRIVE_FOLDER_ID}.`,
-            title: `${state.documentType}_${new Date().getFullYear()}_${Date.now()}`,
-            empty_fields_preference: "leave_blank"
-          }
-        },
-        id: 1
-      })
-    });
+    // Llamada a Google Drive API directo (Chat)
+    console.log('🚀 Chat: Creando documento con Google Drive API directo...');
+    console.log('📄 Chat: Plantilla:', templateName);
+    console.log('📋 Chat: Reemplazos:', Object.keys(replacements).length, 'campos');
 
-    // Manejar Server-Sent Events (SSE) de MCP
-    let mcpResult: any = {};
-    
-    if (mcpResponse.headers.get('content-type')?.includes('text/event-stream')) {
-      // Procesar event stream
-      const responseText = await mcpResponse.text();
-      console.log('MCP SSE Response (Chat):', responseText);
-      
-      // Parsear eventos SSE
-      const events = responseText.split('\n\n').filter(Boolean);
-      for (const event of events) {
-        const lines = event.split('\n');
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const eventData = JSON.parse(line.slice(6));
-              console.log('Parsed SSE data (Chat):', eventData);
-              
-              if (eventData.result) {
-                mcpResult = eventData.result;
-              } else if (eventData.error) {
-                mcpResult = { error: eventData.error };
-              } else {
-                mcpResult = eventData;
-              }
-            } catch (parseError) {
-              console.log('Could not parse SSE line (Chat):', line);
-            }
-          }
-        }
-      }
-    } else {
-      // Respuesta JSON normal
-      mcpResult = await mcpResponse.json();
-    }
+    const googleDriveResult = await createDocumentFromTemplate(
+      templateName,
+      replacements,
+      DRIVE_FOLDER_ID,
+      `${state.documentType}_chat_${new Date().toISOString().split('T')[0]}_${Date.now()}`
+    );
 
-    console.log('MCP Final Result (Chat):', JSON.stringify(mcpResult, null, 2));
-
-    if (mcpResult.error) {
-      throw new Error(`Error de MCP: ${JSON.stringify(mcpResult.error)}`);
+    if (!googleDriveResult.success) {
+      throw new Error(`Error de Google Drive: ${googleDriveResult.error}`);
     }
 
     // Actualizar estado como completado
@@ -208,7 +158,7 @@ async function generateDocument(
       ...state,
       step: 'document_generated',
       isComplete: true,
-      documentUrl: mcpResult.nuevo_doc_url
+      documentUrl: googleDriveResult.documentUrl
     };
 
     conversations.set(sessionId, updatedState);
@@ -217,14 +167,16 @@ async function generateDocument(
       sessionId,
       complete: true,
       success: true,
-      message: `🎉 ¡Documento ${state.documentType} generado exitosamente!
+      message: `🎉 ¡Documento ${state.documentType} generado exitosamente con Google Drive API!
 
 📄 **Tipo:** ${state.documentType}
-🔗 **Documento:** ${mcpResult.nuevo_doc_url || 'Creado en Google Drive'}
+🔗 **Documento:** ${googleDriveResult.documentUrl || 'Creado en Google Drive'}
+🆔 **ID:** ${googleDriveResult.documentId}
 ⏰ **Generado:** ${new Date().toLocaleString('es-MX')}
 
 ¿Necesitas generar algún otro documento para este proyecto?`,
-      documentUrl: mcpResult.nuevo_doc_url,
+      documentUrl: googleDriveResult.documentUrl,
+      documentId: googleDriveResult.documentId,
       documentType: state.documentType,
       extractedData: state.extractedData
     });
@@ -240,7 +192,7 @@ async function generateDocument(
 /**
  * Mapea tipo de documento a nombre de plantilla en Google Drive
  */
-function getTemplateNameForMCP(documentType: DocumentType): string {
+function getTemplateNameForGoogleDrive(documentType: DocumentType): string {
   const templateNames = {
     contrato_base: "Contrato Base 3D Pixel Perfection - Plantilla",
     anexo_a: "ANEXO A - Plantilla",
@@ -253,9 +205,9 @@ function getTemplateNameForMCP(documentType: DocumentType): string {
 }
 
 /**
- * Convierte datos estructurados a formato plano para MCP
+ * Convierte datos estructurados a formato plano para Google Drive
  */
-function flattenDataForMCP(data: any): Record<string, string> {
+function flattenDataForGoogleDrive(data: any): Record<string, string> {
   const flattened: Record<string, string> = {};
   
   for (const [key, value] of Object.entries(data)) {
