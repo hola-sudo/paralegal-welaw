@@ -183,28 +183,25 @@ export async function extractPlaceholdersReal(
 - Autorización del cliente`
   };
 
-  const systemPrompt = `Eres un experto en el negocio de eventos y renders 3D de "3D Pixel Perfection".
+  const systemPrompt = `Extrae datos de esta transcripción de eventos para ${documentType}.
 
-Analiza esta transcripción de una reunión con un cliente que corresponde a ${documentType}.
+CAMPOS A EXTRAER:
+- NOMBRE_CLIENTE: Nombre completo del cliente
+- RFC_cliente: RFC si se menciona
+- NOMBRE_EVENTO: Nombre del evento (ej: "Boda de María")
+- FECHA_EVENTO: Fecha en formato DD/MM/AAAA
+- UBICACION: Lugar del evento
+- EVENTO: Tipo de evento (boda, XV años, etc.)
+- DD/MM/AAAA: Fecha del contrato
+- HH:MM: Hora del evento
 
-${contextPrompts[documentType]}
+REGLAS:
+- Extrae solo lo que está en el texto
+- Si no se menciona, usa cadena vacía ""
+- Responde solo con JSON válido
 
-INSTRUCCIONES ESPECÍFICAS:
-- Extrae EXACTAMENTE lo que se menciona en la transcripción, no inventes datos
-- Si algo no se menciona, usa null o cadena vacía
-- Para fechas, usa formato DD/MM/AAAA
-- Para montos, incluye símbolo de moneda ($ MXN, $ USD, etc.)
-- Para opciones Sí/No, usa "Sí" o "No"
-- Si hay múltiples elementos (cambios, temas), inclúyelos en los campos numerados
-- Mantén exactamente los nombres de placeholders como aparecen en las plantillas
-
-CONTEXTO DEL NEGOCIO:
-- 3D Pixel Perfection crea renders fotorrealistas para eventos
-- Los clientes hablan de "ambientación", "decoración", "visualización"
-- Las medidas suelen estar en metros
-- Los eventos típicos son bodas, XV años, eventos corporativos
-
-Responde ÚNICAMENTE con un JSON válido que coincida con el schema.`;
+Ejemplo:
+{"NOMBRE_CLIENTE":"Juan Pérez","RFC_cliente":"","NOMBRE_EVENTO":"Boda de Juan","FECHA_EVENTO":"15/03/2024","UBICACION":"Salón Eventos","EVENTO":"Boda","DD/MM/AAAA":"","HH:MM":""}`;
 
   try {
     // Usamos structured outputs para obtener JSON válido
