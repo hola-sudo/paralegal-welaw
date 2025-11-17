@@ -23,9 +23,13 @@ interface ServiceAccountKey {
  * Crear cliente autenticado de Google Drive
  */
 function createDriveClient(): drive_v3.Drive {
-  const serviceAccount: ServiceAccountKey = JSON.parse(
-    process.env.GOOGLE_SERVICE_ACCOUNT_KEY as string
-  );
+  // Limpiar el JSON de variables de entorno que pueden tener caracteres extra
+  let serviceAccountJSON = process.env.GOOGLE_SERVICE_ACCOUNT_KEY as string;
+  
+  // Remover saltos de línea y caracteres extra que Vercel puede agregar
+  serviceAccountJSON = serviceAccountJSON.trim().replace(/\r?\n|\r/g, '');
+  
+  const serviceAccount: ServiceAccountKey = JSON.parse(serviceAccountJSON);
 
   const auth = new google.auth.GoogleAuth({
     credentials: serviceAccount,
@@ -231,6 +235,7 @@ export async function testGoogleDriveConnection(): Promise<{
   folderContents?: any[];
 }> {
   try {
+    // Usar la misma función que ya limpia el JSON
     const drive = createDriveClient();
     const folderId = process.env.DRIVE_FOLDER_ID as string;
 
