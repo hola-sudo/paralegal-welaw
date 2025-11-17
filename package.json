@@ -4,7 +4,7 @@
   "description": "Agente AI para paralegal que procesa transcripciones de documentos legales",
   "main": "paralegal-agent.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "echo 'API-only project - no build needed'",
     "dev": "vercel dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
