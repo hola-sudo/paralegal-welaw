@@ -26,15 +26,15 @@
   "type": "commonjs",
   "dependencies": {
     "@openai/agents": "^0.3.2",
-    "docx": "^8.5.0",
+    "@sparticuz/chromium": "^119.0.2",
+    "docx": "^9.5.1",
     "googleapis": "^166.0.0",
     "openai": "^6.9.0",
-    "pdfmake": "^0.2.9",
+    "puppeteer": "^21.3.8",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "@types/pdfmake": "^0.2.12",
     "@types/puppeteer": "^5.4.0",
     "@vercel/node": "^4.0.0",
     "ts-node": "^10.9.0",

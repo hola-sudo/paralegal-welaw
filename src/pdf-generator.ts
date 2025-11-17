@@ -1,15 +1,24 @@
 /**
- * Generador de PDFs para documentos legales
+ * Generador de PDFs profesional usando PDFMake
  * 
- * Este módulo convierte los datos extraídos en PDFs profesionales
- * listos para descarga y procesamiento por agentes externos.
+ * Solución 100% compatible con Vercel Serverless
+ * Sin dependencias pesadas, sin timeouts, sin vulnerabilidades
  */
 
-import puppeteer from 'puppeteer';
-import chromium from '@sparticuz/chromium';
 import { DocumentType } from './schemas-real';
 
-// Tipo flexible para datos extraídos (acepta cualquier estructura)
+// Importación dinámica de pdfmake para evitar problemas de tipos
+const pdfMake = require('pdfmake/build/pdfmake');
+const pdfFonts = require('pdfmake/build/vfs_fonts');
+
+// Configurar fuentes de pdfmake
+if (pdfFonts && pdfFonts.pdfMake && pdfFonts.pdfMake.vfs) {
+  pdfMake.vfs = pdfFonts.pdfMake.vfs;
+} else {
+  console.warn('⚠️ Fuentes de pdfMake no encontradas, usando fuentes del sistema');
+}
+
+// Tipo flexible para datos extraídos
 type ExtractedData = Record<string, any>;
 
 export interface PDFGeneratorOptions {
@@ -28,571 +37,474 @@ export interface PDFGenerationResult {
 }
 
 /**
- * Templates HTML por tipo de documento
+ * Estilos base para todos los documentos
  */
-const htmlTemplates = {
-  contrato_base: (data: any) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Contrato Base - 3D Pixel Perfection</title>
-  <style>
-    body { 
-      font-family: 'Times New Roman', serif; 
-      margin: 2cm; 
-      line-height: 1.4;
-      color: #333;
-    }
-    .header { 
-      text-align: center; 
-      border-bottom: 2px solid #333; 
-      padding-bottom: 20px;
-      margin-bottom: 30px;
-    }
-    .section { 
-      margin: 25px 0; 
-      page-break-inside: avoid;
-    }
-    .field { 
-      margin: 12px 0; 
-      padding: 8px 0;
-      border-bottom: 1px dotted #ccc;
-    }
-    .field strong {
-      display: inline-block;
-      width: 150px;
-      font-weight: bold;
-    }
-    .signature { 
-      margin-top: 60px; 
-      page-break-inside: avoid;
-    }
-    .signature-table {
-      width: 100%;
-      margin-top: 40px;
-    }
-    .signature-table td {
-      text-align: center;
-      vertical-align: bottom;
-      height: 80px;
-    }
-    h1 { color: #2c5aa0; font-size: 24px; margin: 0; }
-    h2 { color: #666; font-size: 18px; margin: 10px 0 0 0; }
-    h3 { color: #2c5aa0; font-size: 16px; border-bottom: 1px solid #2c5aa0; padding-bottom: 5px; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>CONTRATO DE PRESTACIÓN DE SERVICIOS</h1>
-    <h2>3D PIXEL PERFECTION</h2>
-  </div>
-  
-  <div class="section">
-    <h3>DATOS DEL CLIENTE</h3>
-    <div class="field"><strong>Nombre:</strong> ${data.NOMBRE_CLIENTE || 'No especificado'}</div>
-    <div class="field"><strong>RFC:</strong> ${data.RFC_cliente || 'No especificado'}</div>
-    <div class="field"><strong>Dirección:</strong> ${data.DIRECCION_CLIENTE || 'No especificada'}</div>
-    <div class="field"><strong>Teléfono:</strong> ${data.TELEFONO_CLIENTE || 'No especificado'}</div>
-  </div>
-  
-  <div class="section">
-    <h3>DATOS DEL EVENTO</h3>
-    <div class="field"><strong>Nombre del Evento:</strong> ${data.NOMBRE_EVENTO || 'No especificado'}</div>
-    <div class="field"><strong>Tipo de Evento:</strong> ${data.EVENTO || 'No especificado'}</div>
-    <div class="field"><strong>Fecha:</strong> ${data.FECHA_EVENTO || 'No especificada'}</div>
-    <div class="field"><strong>Hora:</strong> ${data.HORA_EVENTO || data['HH:MM'] || 'No especificada'}</div>
-    <div class="field"><strong>Ubicación:</strong> ${data.UBICACION || 'No especificada'}</div>
-    <div class="field"><strong>Duración:</strong> ${data.DURACION_EVENTO || 'No especificada'}</div>
-  </div>
-  
-  <div class="section">
-    <h3>TÉRMINOS ECONÓMICOS</h3>
-    <div class="field"><strong>Monto Total:</strong> ${data.MONTO_TOTAL || 'No especificado'}</div>
-    <div class="field"><strong>Anticipo:</strong> ${data.ANTICIPO || 'No especificado'}</div>
-    <div class="field"><strong>Forma de Pago:</strong> ${data.FORMA_PAGO || 'No especificada'}</div>
-  </div>
-
-  <div class="signature">
-    <div class="field"><strong>Fecha del Contrato:</strong> ${data.FECHA_CONTRATO || data['DD/MM/AAAA'] || new Date().toLocaleDateString('es-ES')}</div>
-    
-    <table class="signature-table">
-      <tr>
-        <td width="50%">
-          _________________________<br>
-          <strong>Firma del Cliente</strong><br>
-          ${data.NOMBRE_CLIENTE || ''}
-        </td>
-        <td width="50%">
-          _________________________<br>
-          <strong>3D Pixel Perfection</strong><br>
-          Representante Legal
-        </td>
-      </tr>
-    </table>
-  </div>
-</body>
-</html>`,
-
-  anexo_a: (data: any) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Anexo A - Especificaciones del Salón</title>
-  <style>
-    body { 
-      font-family: 'Times New Roman', serif; 
-      margin: 2cm; 
-      line-height: 1.4;
-      color: #333;
-    }
-    .header { 
-      text-align: center; 
-      border-bottom: 2px solid #333; 
-      padding-bottom: 20px;
-      margin-bottom: 30px;
-    }
-    .section { 
-      margin: 25px 0; 
-      page-break-inside: avoid;
-    }
-    .field { 
-      margin: 12px 0; 
-      padding: 8px 0;
-      border-bottom: 1px dotted #ccc;
-    }
-    .field strong {
-      display: inline-block;
-      width: 180px;
-      font-weight: bold;
-    }
-    h1 { color: #2c5aa0; font-size: 24px; margin: 0; }
-    h2 { color: #666; font-size: 18px; margin: 10px 0 0 0; }
-    h3 { color: #2c5aa0; font-size: 16px; border-bottom: 1px solid #2c5aa0; padding-bottom: 5px; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>ANEXO A</h1>
-    <h2>ESPECIFICACIONES DEL SALÓN</h2>
-  </div>
-  
-  <div class="section">
-    <h3>DIMENSIONES DEL SALÓN</h3>
-    <div class="field"><strong>Largo:</strong> ${data.MEDIDA_LARGO_SALON || 'No especificado'} metros</div>
-    <div class="field"><strong>Ancho:</strong> ${data.MEDIDA_ANCHO_SALON || 'No especificado'} metros</div>
-    <div class="field"><strong>Alto:</strong> ${data.MEDIDA_ALTO_SALON || 'No especificado'} metros</div>
-  </div>
-
-  <div class="section">
-    <h3>ESPECIFICACIONES DE MONTAJE</h3>
-    <div class="field"><strong>Tipo de Montaje:</strong> ${data.TIPO_MONTAJE || 'No especificado'}</div>
-    <div class="field"><strong>Decoración Principal:</strong> ${data.DECORACION_PRINCIPAL || 'No especificada'}</div>
-    <div class="field"><strong>Colores Temáticos:</strong> ${data.COLORES_TEMATICOS || 'No especificados'}</div>
-    <div class="field"><strong>Elementos Especiales:</strong> ${data.ELEMENTOS_ESPECIALES || 'No especificados'}</div>
-  </div>
-
-  <div class="section">
-    <h3>SERVICIOS ADICIONALES</h3>
-    <div class="field"><strong>Iluminación:</strong> ${data.ILUMINACION || 'Estándar'}</div>
-    <div class="field"><strong>Sonido:</strong> ${data.SONIDO || 'No especificado'}</div>
-    <div class="field"><strong>Mobiliario:</strong> ${data.MOBILIARIO || 'No especificado'}</div>
-  </div>
-</body>
-</html>`,
-
-  anexo_b: (data: any) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Anexo B - Servicios de Fotografía y Video</title>
-  <style>
-    body { 
-      font-family: 'Times New Roman', serif; 
-      margin: 2cm; 
-      line-height: 1.4;
-      color: #333;
-    }
-    .header { 
-      text-align: center; 
-      border-bottom: 2px solid #333; 
-      padding-bottom: 20px;
-      margin-bottom: 30px;
-    }
-    .section { 
-      margin: 25px 0; 
-      page-break-inside: avoid;
-    }
-    .field { 
-      margin: 12px 0; 
-      padding: 8px 0;
-      border-bottom: 1px dotted #ccc;
-    }
-    .field strong {
-      display: inline-block;
-      width: 180px;
-      font-weight: bold;
-    }
-    h1 { color: #2c5aa0; font-size: 24px; margin: 0; }
-    h2 { color: #666; font-size: 18px; margin: 10px 0 0 0; }
-    h3 { color: #2c5aa0; font-size: 16px; border-bottom: 1px solid #2c5aa0; padding-bottom: 5px; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>ANEXO B</h1>
-    <h2>SERVICIOS DE FOTOGRAFÍA Y VIDEO</h2>
-  </div>
-  
-  <div class="section">
-    <h3>SERVICIOS DE FOTOGRAFÍA</h3>
-    <div class="field"><strong>Tipo de Fotografía:</strong> ${data.TIPO_FOTOGRAFIA || 'No especificado'}</div>
-    <div class="field"><strong>Cantidad de Horas:</strong> ${data.HORAS_FOTOGRAFIA || 'No especificadas'}</div>
-    <div class="field"><strong>Número de Fotógrafos:</strong> ${data.NUMERO_FOTOGRAFOS || 'No especificado'}</div>
-    <div class="field"><strong>Estilo Fotográfico:</strong> ${data.ESTILO_FOTOGRAFICO || 'No especificado'}</div>
-  </div>
-
-  <div class="section">
-    <h3>SERVICIOS DE VIDEO</h3>
-    <div class="field"><strong>Tipo de Video:</strong> ${data.TIPO_VIDEO || 'No especificado'}</div>
-    <div class="field"><strong>Duración de Grabación:</strong> ${data.DURACION_VIDEO || 'No especificada'}</div>
-    <div class="field"><strong>Número de Camarógrafos:</strong> ${data.NUMERO_CAMAROGRAFOS || 'No especificado'}</div>
-    <div class="field"><strong>Edición Incluida:</strong> ${data.EDICION_VIDEO || 'No especificada'}</div>
-  </div>
-
-  <div class="section">
-    <h3>ENTREGABLES</h3>
-    <div class="field"><strong>Formato de Entrega:</strong> ${data.FORMATO_ENTREGA || 'No especificado'}</div>
-    <div class="field"><strong>Tiempo de Entrega:</strong> ${data.TIEMPO_ENTREGA || 'No especificado'}</div>
-    <div class="field"><strong>Cantidad de Fotos:</strong> ${data.CANTIDAD_FOTOS || 'No especificada'}</div>
-    <div class="field"><strong>Duración Video Final:</strong> ${data.DURACION_VIDEO_FINAL || 'No especificada'}</div>
-  </div>
-</body>
-</html>`,
-
-  anexo_c: (data: any) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Anexo C - Catering y Servicios Gastronómicos</title>
-  <style>
-    body { 
-      font-family: 'Times New Roman', serif; 
-      margin: 2cm; 
-      line-height: 1.4;
-      color: #333;
-    }
-    .header { 
-      text-align: center; 
-      border-bottom: 2px solid #333; 
-      padding-bottom: 20px;
-      margin-bottom: 30px;
-    }
-    .section { 
-      margin: 25px 0; 
-      page-break-inside: avoid;
-    }
-    .field { 
-      margin: 12px 0; 
-      padding: 8px 0;
-      border-bottom: 1px dotted #ccc;
-    }
-    .field strong {
-      display: inline-block;
-      width: 180px;
-      font-weight: bold;
-    }
-    h1 { color: #2c5aa0; font-size: 24px; margin: 0; }
-    h2 { color: #666; font-size: 18px; margin: 10px 0 0 0; }
-    h3 { color: #2c5aa0; font-size: 16px; border-bottom: 1px solid #2c5aa0; padding-bottom: 5px; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>ANEXO C</h1>
-    <h2>CATERING Y SERVICIOS GASTRONÓMICOS</h2>
-  </div>
-  
-  <div class="section">
-    <h3>INFORMACIÓN GENERAL</h3>
-    <div class="field"><strong>Número de Invitados:</strong> ${data.NUMERO_INVITADOS || 'No especificado'}</div>
-    <div class="field"><strong>Tipo de Servicio:</strong> ${data.TIPO_SERVICIO_CATERING || 'No especificado'}</div>
-    <div class="field"><strong>Hora del Servicio:</strong> ${data.HORA_SERVICIO || 'No especificada'}</div>
-  </div>
-
-  <div class="section">
-    <h3>MENÚ Y ALIMENTOS</h3>
-    <div class="field"><strong>Tipo de Menú:</strong> ${data.TIPO_MENU || 'No especificado'}</div>
-    <div class="field"><strong>Entrada:</strong> ${data.ENTRADA || 'No especificada'}</div>
-    <div class="field"><strong>Plato Principal:</strong> ${data.PLATO_PRINCIPAL || 'No especificado'}</div>
-    <div class="field"><strong>Postre:</strong> ${data.POSTRE || 'No especificado'}</div>
-    <div class="field"><strong>Bebidas:</strong> ${data.BEBIDAS || 'No especificadas'}</div>
-  </div>
-
-  <div class="section">
-    <h3>SERVICIOS ADICIONALES</h3>
-    <div class="field"><strong>Personal de Servicio:</strong> ${data.PERSONAL_SERVICIO || 'No especificado'}</div>
-    <div class="field"><strong>Mobiliario Catering:</strong> ${data.MOBILIARIO_CATERING || 'No especificado'}</div>
-    <div class="field"><strong>Restricciones Dietéticas:</strong> ${data.RESTRICCIONES_DIETETICAS || 'Ninguna'}</div>
-  </div>
-</body>
-</html>`,
-
-  anexo_d: (data: any) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Anexo D - Servicios Técnicos Adicionales</title>
-  <style>
-    body { 
-      font-family: 'Times New Roman', serif; 
-      margin: 2cm; 
-      line-height: 1.4;
-      color: #333;
-    }
-    .header { 
-      text-align: center; 
-      border-bottom: 2px solid #333; 
-      padding-bottom: 20px;
-      margin-bottom: 30px;
-    }
-    .section { 
-      margin: 25px 0; 
-      page-break-inside: avoid;
-    }
-    .field { 
-      margin: 12px 0; 
-      padding: 8px 0;
-      border-bottom: 1px dotted #ccc;
-    }
-    .field strong {
-      display: inline-block;
-      width: 180px;
-      font-weight: bold;
-    }
-    h1 { color: #2c5aa0; font-size: 24px; margin: 0; }
-    h2 { color: #666; font-size: 18px; margin: 10px 0 0 0; }
-    h3 { color: #2c5aa0; font-size: 16px; border-bottom: 1px solid #2c5aa0; padding-bottom: 5px; }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <h1>ANEXO D</h1>
-    <h2>SERVICIOS TÉCNICOS ADICIONALES</h2>
-  </div>
-  
-  <div class="section">
-    <h3>EQUIPAMIENTO AUDIOVISUAL</h3>
-    <div class="field"><strong>Sistema de Sonido:</strong> ${data.SISTEMA_SONIDO || 'No especificado'}</div>
-    <div class="field"><strong>Equipo de Iluminación:</strong> ${data.EQUIPO_ILUMINACION || 'No especificado'}</div>
-    <div class="field"><strong>Proyección/Pantallas:</strong> ${data.PROYECCION || 'No especificado'}</div>
-    <div class="field"><strong>Micrófonos:</strong> ${data.MICROFONOS || 'No especificados'}</div>
-  </div>
-
-  <div class="section">
-    <h3>SERVICIOS DE ENTRETENIMIENTO</h3>
-    <div class="field"><strong>DJ/Música:</strong> ${data.DJ_MUSICA || 'No especificado'}</div>
-    <div class="field"><strong>Animación:</strong> ${data.ANIMACION || 'No especificada'}</div>
-    <div class="field"><strong>Shows Especiales:</strong> ${data.SHOWS_ESPECIALES || 'No especificados'}</div>
-    <div class="field"><strong>Duración del Entretenimiento:</strong> ${data.DURACION_ENTRETENIMIENTO || 'No especificada'}</div>
-  </div>
-
-  <div class="section">
-    <h3>SERVICIOS LOGÍSTICOS</h3>
-    <div class="field"><strong>Transporte:</strong> ${data.TRANSPORTE || 'No especificado'}</div>
-    <div class="field"><strong>Montaje/Desmontaje:</strong> ${data.MONTAJE_DESMONTAJE || 'No especificado'}</div>
-    <div class="field"><strong>Personal Técnico:</strong> ${data.PERSONAL_TECNICO || 'No especificado'}</div>
-    <div class="field"><strong>Coordinación Evento:</strong> ${data.COORDINACION_EVENTO || 'No especificada'}</div>
-  </div>
-</body>
-</html>`
+const baseStyles = {
+  header: {
+    fontSize: 18,
+    bold: true,
+    alignment: 'center' as const,
+    margin: [0, 0, 0, 20] as [number, number, number, number]
+  },
+  subheader: {
+    fontSize: 14,
+    bold: true,
+    margin: [0, 20, 0, 10] as [number, number, number, number]
+  },
+  clausula: {
+    fontSize: 12,
+    bold: true,
+    margin: [0, 15, 0, 5] as [number, number, number, number]
+  },
+  normal: {
+    fontSize: 11,
+    lineHeight: 1.3,
+    margin: [0, 0, 0, 10] as [number, number, number, number]
+  },
+  firma: {
+    fontSize: 11,
+    margin: [0, 30, 0, 5] as [number, number, number, number],
+    alignment: 'center' as const
+  },
+  fecha: {
+    fontSize: 11,
+    margin: [0, 20, 0, 20] as [number, number, number, number],
+    alignment: 'center' as const
+  }
 };
 
 /**
- * Genera un PDF a partir de los datos extraídos
+ * Template para Contrato Base
  */
-export async function generatePDF(options: PDFGeneratorOptions): Promise<PDFGenerationResult> {
-  try {
-    // Validar inputs
-    if (!options.templateType || !options.extractedData) {
-      return {
-        success: false,
-        error: 'Template type y extracted data son requeridos'
-      };
-    }
-
-    // Obtener el template HTML correspondiente
-    const templateFunction = htmlTemplates[options.templateType];
-    if (!templateFunction) {
-      return {
-        success: false,
-        error: `Template no encontrado para tipo: ${options.templateType}`
-      };
-    }
-
-    // Generar HTML con los datos
-    const htmlContent = templateFunction(options.extractedData);
-
-    // Configurar puppeteer para entorno serverless
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--single-process',
-        '--no-zygote',
-        '--disable-extensions',
-        '--disable-background-timer-throttling'
-      ]
-    });
-
-    const page = await browser.newPage();
-    
-    // Cargar el HTML
-    await page.setContent(htmlContent, { 
-      waitUntil: 'networkidle0',
-      timeout: 30000 
-    });
-
-    // Generar PDF
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      margin: {
-        top: '1cm',
-        right: '1cm', 
-        bottom: '1cm',
-        left: '1cm'
+function createContratoBase(data: any) {
+  return {
+    content: [
+      { text: 'CONTRATO BASE 3D PIXEL PERFECTION', style: 'header' },
+      { text: 'CONTRATO DE PRESTACIÓN DE SERVICIOS DE RENDERS Y MODELADO 3D', style: 'subheader' },
+      
+      { text: '\nPARTES DEL CONTRATO:', style: 'clausula' },
+      { 
+        text: [
+          'CONTRATANTE: ',
+          { text: data.empresa_cliente || '[EMPRESA CLIENTE]', bold: true },
+          ', representada por ',
+          { text: data.representante_cliente || '[REPRESENTANTE]', bold: true },
+          ' en su carácter de ',
+          { text: data.cargo_representante || '[CARGO]', bold: true }
+        ], 
+        style: 'normal' 
       },
-      printBackground: true,
-      preferCSSPageSize: true
-    });
+      { 
+        text: [
+          'CONTRATADO: ',
+          { text: '3D PIXEL PERFECTION', bold: true },
+          ', empresa especializada en renders arquitectónicos y modelado 3D profesional.'
+        ], 
+        style: 'normal' 
+      },
 
-    await browser.close();
+      { text: 'PRIMERA: OBJETO DEL CONTRATO', style: 'clausula' },
+      { 
+        text: data.descripcion_proyecto || 'El presente contrato tiene por objeto la prestación de servicios de renders 3D y modelado arquitectónico profesional.',
+        style: 'normal' 
+      },
 
-    // Generar nombre de archivo único
-    const timestamp = Date.now();
-    const fileName = `${options.documentName}_${timestamp}.pdf`;
+      { text: 'SEGUNDA: ESPECIFICACIONES TÉCNICAS', style: 'clausula' },
+      { 
+        text: [
+          'Resolución de renders: ',
+          { text: data.resolucion || '4K (3840x2160)', bold: true },
+          '\nFormato de entrega: ',
+          { text: data.formato_entrega || 'JPG, PNG, MP4', bold: true },
+          '\nSoftware utilizado: ',
+          { text: data.software || '3ds Max, V-Ray, Corona Renderer', bold: true }
+        ],
+        style: 'normal' 
+      },
 
-    return {
-      success: true,
-      pdfBuffer,
-      fileName,
-      downloadUrl: `/api/download/${fileName}` // URL del endpoint de descarga
-    };
+      { text: 'TERCERA: CRONOGRAMA Y ENTREGABLES', style: 'clausula' },
+      { 
+        text: [
+          'Fecha de inicio: ',
+          { text: data.fecha_inicio || '[FECHA INICIO]', bold: true },
+          '\nFecha de entrega: ',
+          { text: data.fecha_entrega || '[FECHA ENTREGA]', bold: true },
+          '\nEntregables: ',
+          { text: data.entregables || 'Renders finales, archivos fuente, documentación técnica', bold: true }
+        ],
+        style: 'normal' 
+      },
 
-  } catch (error) {
-    console.error('Error generando PDF:', error);
-    return {
-      success: false,
-      error: `Error generando PDF: ${error instanceof Error ? error.message : 'Error desconocido'}`
-    };
-  }
+      { text: 'CUARTA: CONDICIONES ECONÓMICAS', style: 'clausula' },
+      { 
+        text: [
+          'Monto total: ',
+          { text: data.monto_total || '[MONTO]', bold: true },
+          '\nForma de pago: ',
+          { text: data.forma_pago || '50% al inicio, 50% a la entrega', bold: true }
+        ],
+        style: 'normal' 
+      },
+
+      { text: 'QUINTA: PROPIEDAD INTELECTUAL', style: 'clausula' },
+      { 
+        text: 'Los renders y modelos 3D entregados son propiedad del CONTRATANTE una vez liquidado el pago total. 3D PIXEL PERFECTION conserva el derecho de uso para portafolio comercial.',
+        style: 'normal' 
+      },
+
+      { text: '\n\nFIRMAS:', style: 'clausula' },
+      
+      {
+        columns: [
+          {
+            width: '50%',
+            text: [
+              '\n\n_________________________\n',
+              { text: data.representante_cliente || '[REPRESENTANTE CLIENTE]', bold: true },
+              '\n',
+              data.empresa_cliente || '[EMPRESA CLIENTE]'
+            ],
+            style: 'firma'
+          },
+          {
+            width: '50%',
+            text: [
+              '\n\n_________________________\n',
+              { text: 'DIRECTOR GENERAL', bold: true },
+              '\n',
+              '3D PIXEL PERFECTION'
+            ],
+            style: 'firma'
+          }
+        ]
+      },
+
+      { 
+        text: `\nFecha: ${new Date().toLocaleDateString('es-ES')}`,
+        style: 'fecha' 
+      }
+    ],
+    styles: baseStyles,
+    defaultStyle: {
+      font: 'Roboto'
+    }
+  };
 }
 
 /**
- * Genera PDF con template de error para casos donde faltan datos críticos
+ * Template para Anexo A - Especificaciones Técnicas
  */
-export async function generateErrorPDF(
-  errorMessage: string,
-  templateType: DocumentType,
-  partialData?: any
-): Promise<PDFGenerationResult> {
-  
-  const errorHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Error en Procesamiento - ${templateType}</title>
-  <style>
-    body { 
-      font-family: 'Times New Roman', serif; 
-      margin: 2cm; 
-      line-height: 1.6;
-      color: #333;
-    }
-    .error-header {
-      background: #f8d7da;
-      border: 1px solid #f5c6cb;
-      color: #721c24;
-      padding: 20px;
-      border-radius: 5px;
-      margin-bottom: 30px;
-    }
-    .partial-data {
-      background: #fff3cd;
-      border: 1px solid #ffeaa7;
-      padding: 15px;
-      border-radius: 5px;
-      margin: 20px 0;
-    }
-  </style>
-</head>
-<body>
-  <div class="error-header">
-    <h1>⚠️ Error en Procesamiento del Documento</h1>
-    <p><strong>Tipo de documento:</strong> ${templateType}</p>
-    <p><strong>Error:</strong> ${errorMessage}</p>
-    <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-ES')}</p>
-  </div>
+function createAnexoA(data: any) {
+  return {
+    content: [
+      { text: 'ANEXO A - ESPECIFICACIONES TÉCNICAS', style: 'header' },
+      { text: 'RENDERS Y MODELADO 3D PROFESIONAL', style: 'subheader' },
 
-  <div class="partial-data">
-    <h3>📋 Datos Parciales Extraídos</h3>
-    <pre>${JSON.stringify(partialData || {}, null, 2)}</pre>
-  </div>
+      { text: 'ESPECIFICACIONES DE RENDERS:', style: 'clausula' },
+      {
+        ul: [
+          `Resolución: ${data.resolucion || '4K (3840x2160)'}`,
+          `Calidad: ${data.calidad || 'Ultra High Definition'}`,
+          `Formato de imagen: ${data.formato_imagen || 'JPG (RGB), PNG (transparencia)'}`,
+          `Formato de video: ${data.formato_video || 'MP4 H.264, MOV ProRes'}`
+        ],
+        style: 'normal'
+      },
 
-  <div>
-    <h3>🔧 Acciones Recomendadas</h3>
-    <ul>
-      <li>Verificar que la transcripción esté completa</li>
-      <li>Asegurar que contenga todos los campos requeridos para ${templateType}</li>
-      <li>Revisar la calidad del audio original</li>
-      <li>Contactar soporte técnico si el problema persiste</li>
-    </ul>
-  </div>
-</body>
-</html>`;
+      { text: 'SOFTWARE Y TECNOLOGÍAS:', style: 'clausula' },
+      {
+        ul: [
+          `Modelado: ${data.software_modelado || '3ds Max, SketchUp Pro'}`,
+          `Renderizado: ${data.software_render || 'V-Ray, Corona Renderer'}`,
+          `Post-producción: ${data.software_post || 'Photoshop, After Effects'}`,
+          `Gestión de proyecto: ${data.software_gestion || 'Monday, Slack, Google Drive'}`
+        ],
+        style: 'normal'
+      },
 
+      { text: 'TIPOS DE RENDERS INCLUIDOS:', style: 'clausula' },
+      {
+        ul: [
+          'Renders exteriores diurnos y nocturnos',
+          'Renders interiores con iluminación natural y artificial',
+          'Recorridos virtuales (walkthrough)',
+          'Animaciones de productos arquitectónicos'
+        ],
+        style: 'normal'
+      },
+
+      { text: 'ESTÁNDARES DE CALIDAD:', style: 'clausula' },
+      { 
+        text: 'Todos los renders cumplirán con estándares internacionales de visualización arquitectónica, incluyendo iluminación realista, materiales fotorrealistas y composición profesional.',
+        style: 'normal' 
+      }
+    ],
+    styles: baseStyles,
+    defaultStyle: {
+      font: 'Roboto'
+    }
+  };
+}
+
+/**
+ * Template para Anexo B - Cronograma
+ */
+function createAnexoB(data: any) {
+  const etapas = data.cronograma_etapas || [
+    { nombre: 'Análisis de requerimientos', duracion: '3 días', entregable: 'Briefing técnico' },
+    { nombre: 'Modelado 3D', duracion: '7 días', entregable: 'Modelos base' },
+    { nombre: 'Texturización y materiales', duracion: '4 días', entregable: 'Modelos texturizados' },
+    { nombre: 'Iluminación y renderizado', duracion: '5 días', entregable: 'Renders draft' },
+    { nombre: 'Post-producción', duracion: '3 días', entregable: 'Renders finales' }
+  ];
+
+  return {
+    content: [
+      { text: 'ANEXO B - CRONOGRAMA Y ENTREGABLES', style: 'header' },
+      { text: 'PLANIFICACIÓN DE PROYECTO', style: 'subheader' },
+
+      { text: 'CRONOGRAMA DETALLADO:', style: 'clausula' },
+
+      {
+        table: {
+          headerRows: 1,
+          widths: ['*', 'auto', '*'],
+          body: [
+            [
+              { text: 'ETAPA', style: 'clausula' },
+              { text: 'DURACIÓN', style: 'clausula' },
+              { text: 'ENTREGABLE', style: 'clausula' }
+            ],
+            ...etapas.map((etapa: any) => [
+              etapa.nombre,
+              etapa.duracion,
+              etapa.entregable
+            ])
+          ]
+        },
+        style: 'normal'
+      },
+
+      { text: '\nHITOS IMPORTANTES:', style: 'clausula' },
+      {
+        ul: [
+          `Inicio del proyecto: ${data.fecha_inicio || '[FECHA INICIO]'}`,
+          `Entrega de modelos base: ${data.fecha_modelos || '[FECHA MODELOS]'}`,
+          `Revisión intermedia: ${data.fecha_revision || '[FECHA REVISIÓN]'}`,
+          `Entrega final: ${data.fecha_entrega || '[FECHA ENTREGA]'}`
+        ],
+        style: 'normal'
+      },
+
+      { text: 'PROCESO DE REVISIONES:', style: 'clausula' },
+      { 
+        text: 'Se contemplan hasta 3 rondas de revisiones sin costo adicional. Cambios mayores que requieran re-modelado serán cotizados por separado.',
+        style: 'normal' 
+      }
+    ],
+    styles: baseStyles,
+    defaultStyle: {
+      font: 'Roboto'
+    }
+  };
+}
+
+/**
+ * Template para Anexo C - Facturación
+ */
+function createAnexoC(data: any) {
+  return {
+    content: [
+      { text: 'ANEXO C - FACTURACIÓN Y PAGOS', style: 'header' },
+      { text: 'CONDICIONES ECONÓMICAS', style: 'subheader' },
+
+      { text: 'DESGLOSE DE COSTOS:', style: 'clausula' },
+      {
+        table: {
+          headerRows: 1,
+          widths: ['*', 'auto', 'auto'],
+          body: [
+            [
+              { text: 'CONCEPTO', style: 'clausula' },
+              { text: 'CANTIDAD', style: 'clausula' },
+              { text: 'IMPORTE', style: 'clausula' }
+            ],
+            [
+              'Renders exteriores',
+              data.cantidad_exteriores || '8',
+              data.costo_exteriores || '$15,000'
+            ],
+            [
+              'Renders interiores',
+              data.cantidad_interiores || '12',
+              data.costo_interiores || '$18,000'
+            ],
+            [
+              'Recorrido virtual',
+              data.cantidad_recorridos || '1',
+              data.costo_recorridos || '$8,000'
+            ],
+            [
+              { text: 'TOTAL', bold: true },
+              '',
+              { text: data.monto_total || '$41,000', bold: true }
+            ]
+          ]
+        },
+        style: 'normal'
+      },
+
+      { text: '\nESQUEMA DE PAGOS:', style: 'clausula' },
+      {
+        ul: [
+          `Anticipo (50%): ${data.anticipo || '$20,500'} - Al firmar contrato`,
+          `Pago intermedio (30%): ${data.pago_intermedio || '$12,300'} - Al entregar modelos`,
+          `Pago final (20%): ${data.pago_final || '$8,200'} - Al entregar renders finales`
+        ],
+        style: 'normal'
+      },
+
+      { text: 'DATOS PARA TRANSFERENCIA:', style: 'clausula' },
+      { 
+        text: [
+          'Beneficiario: ',
+          { text: '3D PIXEL PERFECTION S.A. de C.V.', bold: true },
+          '\nBanco: ',
+          { text: data.banco || 'BBVA BANCOMER', bold: true },
+          '\nCuenta: ',
+          { text: data.cuenta || '0123456789', bold: true },
+          '\nCLABE: ',
+          { text: data.clabe || '012345678901234567', bold: true }
+        ],
+        style: 'normal' 
+      },
+
+      { text: 'FACTURACIÓN:', style: 'clausula' },
+      { 
+        text: 'Se emitirá factura fiscal (CFDI) dentro de las 72 horas posteriores a recibir cada pago. Se requieren datos fiscales completos del cliente.',
+        style: 'normal' 
+      }
+    ],
+    styles: baseStyles,
+    defaultStyle: {
+      font: 'Roboto'
+    }
+  };
+}
+
+/**
+ * Template para Anexo D - Términos
+ */
+function createAnexoD(data: any) {
+  return {
+    content: [
+      { text: 'ANEXO D - TÉRMINOS Y CONDICIONES', style: 'header' },
+      { text: 'CONDICIONES GENERALES DEL SERVICIO', style: 'subheader' },
+
+      { text: 'RESPONSABILIDADES DEL CLIENTE:', style: 'clausula' },
+      {
+        ol: [
+          'Proporcionar planos arquitectónicos actualizados en formato DWG o PDF',
+          'Definir claramente los requerimientos visuales y estilísticos',
+          'Proporcionar referencias visuales y mood boards cuando sea necesario',
+          'Realizar pagos en tiempo y forma según cronograma establecido',
+          'Responder a consultas técnicas en un plazo máximo de 48 horas'
+        ],
+        style: 'normal'
+      },
+
+      { text: 'RESPONSABILIDADES DEL PRESTADOR:', style: 'clausula' },
+      {
+        ol: [
+          'Entregar renders de calidad profesional según especificaciones acordadas',
+          'Cumplir con cronograma de entrega salvo causas de fuerza mayor',
+          'Mantener confidencialidad total sobre información del proyecto',
+          'Proporcionar soporte técnico durante el proceso de desarrollo',
+          'Realizar revisiones incluidas sin costo adicional'
+        ],
+        style: 'normal'
+      },
+
+      { text: 'POLÍTICAS DE REVISIONES:', style: 'clausula' },
+      { 
+        text: 'Se incluyen hasta 3 rondas de revisiones menores sin costo adicional. Se consideran revisiones mayores aquellas que implican cambios de diseño, materiales o iluminación que requieran más de 2 horas de trabajo.',
+        style: 'normal' 
+      },
+
+      { text: 'CANCELACIONES Y REEMBOLSOS:', style: 'clausula' },
+      { 
+        text: 'En caso de cancelación del proyecto, se reembolsará únicamente la parte proporcional no trabajada, previa entrega de avances realizados.',
+        style: 'normal' 
+      },
+
+      { text: 'FUERZA MAYOR:', style: 'clausula' },
+      { 
+        text: 'No seremos responsables por retrasos causados por circunstancias fuera de nuestro control, incluyendo pero no limitándose a: desastres naturales, fallas tecnológicas, o cambios en requerimientos del cliente.',
+        style: 'normal' 
+      }
+    ],
+    styles: baseStyles,
+    defaultStyle: {
+      font: 'Roboto'
+    }
+  };
+}
+
+/**
+ * Función principal para generar PDFs
+ */
+export async function generatePDF(options: PDFGeneratorOptions): Promise<PDFGenerationResult> {
   try {
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu'
-      ]
-    });
-
-    const page = await browser.newPage();
-    await page.setContent(errorHtml, { waitUntil: 'networkidle0' });
+    console.log('🚀 Iniciando generación de PDF con PDFMake...');
+    console.log('📄 Tipo:', options.templateType);
     
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      margin: { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' }
+    let documentDefinition;
+    
+    // Seleccionar template según tipo de documento
+    switch (options.templateType) {
+      case 'contrato_base':
+        documentDefinition = createContratoBase(options.extractedData);
+        break;
+      case 'anexo_a':
+        documentDefinition = createAnexoA(options.extractedData);
+        break;
+      case 'anexo_b':
+        documentDefinition = createAnexoB(options.extractedData);
+        break;
+      case 'anexo_c':
+        documentDefinition = createAnexoC(options.extractedData);
+        break;
+      case 'anexo_d':
+        documentDefinition = createAnexoD(options.extractedData);
+        break;
+      default:
+        throw new Error(`Tipo de documento no soportado: ${options.templateType}`);
+    }
+
+    // Generar PDF
+    const pdfDoc = pdfMake.createPdf(documentDefinition);
+    
+    return new Promise((resolve, reject) => {
+      pdfDoc.getBuffer((buffer: Buffer) => {
+        const fileName = `${options.documentName}.pdf`;
+        
+        console.log('✅ PDF generado exitosamente');
+        console.log('📦 Tamaño:', buffer.length, 'bytes');
+        
+        resolve({
+          success: true,
+          pdfBuffer: buffer,
+          fileName: fileName,
+          downloadUrl: `/api/download/${options.documentName}`
+        });
+      });
     });
 
-    await browser.close();
-
-    const fileName = `error_${templateType}_${Date.now()}.pdf`;
-
-    return {
-      success: true,
-      pdfBuffer,
-      fileName,
-      downloadUrl: `/api/download/${fileName}`
-    };
-
-  } catch (error) {
+  } catch (error: any) {
+    console.error('❌ Error generando PDF:', error);
     return {
       success: false,
-      error: `Error generando PDF de error: ${error instanceof Error ? error.message : 'Error desconocido'}`
+      error: `Error en generación de PDF: ${error.message}`
     };
   }
 }
