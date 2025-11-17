@@ -95,12 +95,14 @@ export default async function handler(
       },
       body: JSON.stringify({
         jsonrpc: "2.0",
-        method: "notifications/list", 
+        method: "tools/call",
         params: {
-          action: "create_document_from_template",
-          template_file_id: templateName,
-          destination_folder_id: DRIVE_FOLDER_ID,
-          field_values: replacements
+          name: "google_drive_create_document",
+          arguments: {
+            template_name: templateName,
+            folder_id: DRIVE_FOLDER_ID,
+            replacements: replacements
+          }
         },
         id: 1
       })
