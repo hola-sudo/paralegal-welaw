@@ -152,9 +152,9 @@ async function generateDocument(
         params: {
           name: "google_docs_create_document_from_template",
           arguments: {
-            template_name: templateName,
-            folder_id: DRIVE_FOLDER_ID,
-            replacements: replacements
+            instructions: `Create a new document from template "${templateName}" with the following field replacements: ${JSON.stringify(replacements)}. Save the document to folder ID ${DRIVE_FOLDER_ID}.`,
+            title: `${state.documentType}_${new Date().getFullYear()}_${Date.now()}`,
+            empty_fields_preference: "leave_blank"
           }
         },
         id: 1
