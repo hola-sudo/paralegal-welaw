@@ -438,21 +438,37 @@ export async function generatePDF(options: PDFGeneratorOptions): Promise<PDFGene
     const htmlContent = templateFunction(options.extractedData);
 
     // Configurar puppeteer para entorno serverless (Vercel con @sparticuz/chromium)
+    let executablePath: string;
+    
+    if (process.env.VERCEL) {
+      // En Vercel, usar chromium
+      executablePath = await chromium.executablePath();
+    } else {
+      // En desarrollo local, usar el chromium del sistema
+      executablePath = '/usr/bin/chromium-browser' || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+    }
+    
     const browser = await puppeteer.launch({
       args: [
-        ...chromium.args,
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
         '--single-process',
         '--no-zygote',
-        '--disable-extensions'
+        '--disable-extensions',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--disable-features=TranslateUI',
+        '--disable-ipc-flooding-protection',
+        '--memory-pressure-off'
       ],
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath(),
+      defaultViewport: { width: 1280, height: 720 },
+      executablePath,
       headless: true,
-      ignoreHTTPSErrors: true
+      ignoreHTTPSErrors: true,
+      timeout: 30000
     });
 
     const page = await browser.newPage();
