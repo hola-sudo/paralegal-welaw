@@ -1,105 +1,56 @@
-/**
- * API Endpoint para Vercel
- * 
- * Este es el endpoint que Vercel usará para procesar transcripciones.
- * Acepta POST requests con una transcripción y retorna los datos estructurados.
- * 
- * Ruta: /api/process
- */
+import { NextRequest, NextResponse } from 'next/server';
 
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { processTranscript } from '../src/agent';
+import { OpenAI } from 'openai';
 
-/**
- * Maneja las requests POST al endpoint /api/process
- * 
- * Body esperado:
- * {
- *   "transcript": "texto de la transcripción aquí..."
- * }
- * 
- * Respuesta exitosa (200):
- * {
- *   "success": true,
- *   "data": {
- *     "tipo_documento": "contrato_base",
- *     "datos": { ... },
- *     "guardrails": { ... },
- *     "metadata": { ... }
- *   }
- * }
- * 
- * Respuesta de error (400/500):
- * {
- *   "success": false,
- *   "error": "mensaje de error"
- * }
- */
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
-  // Solo permitimos métodos POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({
-      success: false,
-      error: 'Método no permitido. Use POST.',
-    });
-  }
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY as string });
+const MCP_ENDPOINT = process.env.MCP_ENDPOINT as string;
+const MCP_API_KEY = process.env.MCP_API_KEY as string;
+const DRIVE_FOLDER_ID = process.env.DRIVE_FOLDER_ID as string;
 
+export const POST = async (req: NextRequest) => {
   try {
-    // Validamos que tengamos la API key de OpenAI
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(500).json({
-        success: false,
-        error: 'OPENAI_API_KEY no está configurada. Por favor, configura la variable de entorno.',
-      });
-    }
+    const { transcripcion } = await req.json();
+    if (!transcripcion) return NextResponse.json({ error: "Falta transcripción" }, { status: 400 });
 
-    // Obtenemos la transcripción del body
-    const { transcript } = req.body;
+    // Clasificación
+    const tipoRes = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "system", content: "Clasifica solo con una palabra: contrato_base, anexo_a, anexo_b, anexo_c o anexo_d" }, { role: "user", content: transcripcion }],
+      temperature: 0
+    });
+    const tipo = tipoRes.choices[0].message.content?.trim().toLowerCase() || "contrato_base";
 
-    // Validamos que la transcripción esté presente
-    if (!transcript || typeof transcript !== 'string') {
-      return res.status(400).json({
-        success: false,
-        error: 'Se requiere el campo "transcript" en el body de la request.',
-      });
-    }
+    // Extracción simple
+    const extractRes = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "system", content: `Extrae JSON plano con todos los placeholders que encuentres. Incluye NOMBRE_CLIENTE, RFC_cliente, FECHA_EVENTO, etc. Si no hay, pon null.` }, { role: "user", content: transcripcion }]
+    });
+    const campos = JSON.parse(extractRes.choices[0].message.content || "{}");
 
-    // Validamos que la transcripción no esté vacía
-    if (transcript.trim().length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'La transcripción no puede estar vacía.',
-      });
-    }
+    // Llamada a MCP para crear documento en Drive
+    const mcpResponse = await fetch(MCP_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${MCP_API_KEY}` },
+      body: JSON.stringify({
+        accion: "guardar",
+        template_name: tipo === "contrato_base" ? "Contrato Base 3D Pixel Perfection - Plantilla" : `ANEXO ${tipo.replace("anexo_", "").toUpperCase()} - Plantilla`,
+        folder_id: DRIVE_FOLDER_ID,
+        replacements: campos
+      })
+    });
 
-    // Procesamos la transcripción usando nuestro agente
-    const result = await processTranscript(transcript);
+    const mcpResult = await mcpResponse.json();
 
-    // Retornamos el resultado exitoso
-    return res.status(200).json({
+    return NextResponse.json({
       success: true,
-      data: result,
+      tipo,
+      documento_creado: mcpResult.nuevo_doc_url || "https://drive.google.com/drive/folders/" + DRIVE_FOLDER_ID,
+      resumen: `¡Documento ${tipo} creado exitosamente en Google Drive!`
     });
-  } catch (error) {
-    // Manejo de errores
-    console.error('Error al procesar transcripción:', error);
-    
-    // Si es un error conocido (bloqueado por guardrails, etc.), retornamos 400
-    if (error instanceof Error && error.message.includes('bloqueado')) {
-      return res.status(400).json({
-        success: false,
-        error: error.message,
-      });
-    }
 
-    // Para otros errores, retornamos 500
-    return res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Error desconocido al procesar la transcripción',
-    });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
-}
+};
 
+export const config = { api: { bodyParser: true } };

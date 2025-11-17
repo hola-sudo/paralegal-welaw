@@ -20,11 +20,13 @@
   "type": "commonjs",
   "dependencies": {
     "@openai/agents": "^0.3.2",
+    "next": "^14.0.0",
     "openai": "^6.9.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
     "@vercel/node": "^3.0.0",
     "typescript": "^5.0.0"
   },
