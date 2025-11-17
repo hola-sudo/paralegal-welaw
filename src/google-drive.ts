@@ -188,7 +188,7 @@ export async function createDocumentFromTemplate(
     const documentMetadata = {
       name: docName,
       mimeType: 'application/vnd.google-apps.document',
-      // Crear en la raíz del service account (sin parents para evitar problemas de permisos)
+      parents: [folderId], // Crear en la carpeta específica del usuario
     };
 
     const createResponse = await drive.files.create({
