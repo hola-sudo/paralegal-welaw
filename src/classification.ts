@@ -8,7 +8,6 @@
 
 import OpenAI from 'openai';
 import { DocumentType, DocumentTypeSchema, DocumentSchemas, ExtractedData } from './schemas';
-import { zodResponseFormat } from 'openai/helpers/zod';
 
 // Inicializamos el cliente de OpenAI
 const openai = new OpenAI({
@@ -123,24 +122,26 @@ Extrae TODA la información relevante según los campos definidos en el schema.
 - Si hay múltiples valores (como múltiples contactos), inclúyelos todos en arrays`;
 
   try {
-    const response = await openai.beta.chat.completions.parse({
+    // Usamos chat.completions con response_format json_object y luego validamos con Zod
+    const response = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: systemPrompt },
+        { role: 'system', content: systemPrompt + '\n\nResponde ÚNICAMENTE con un JSON válido que contenga todos los campos del schema.' },
         { role: 'user', content: transcript },
       ],
-      response_format: zodResponseFormat(schema, 'extracted_data'),
+      response_format: { type: 'json_object' },
       temperature: 0.1,
     });
 
-    const extracted = response.choices[0]?.message?.parsed;
+    const jsonContent = response.choices[0]?.message?.content;
     
-    if (!extracted) {
+    if (!jsonContent) {
       throw new Error('No se pudieron extraer los datos del documento');
     }
 
-    // Validamos con Zod para asegurar que los datos son correctos
-    return schema.parse(extracted);
+    // Parseamos el JSON y validamos con Zod
+    const parsed = JSON.parse(jsonContent);
+    return schema.parse(parsed);
   } catch (error) {
     console.error('Error al extraer placeholders:', error);
     

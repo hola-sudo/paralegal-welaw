@@ -131,7 +131,8 @@ export async function checkModeration(text: string): Promise<GuardrailResult> {
       if (categories['sexual/minors']) detectedCategories.push('contenido sexual con menores');
       if (categories.violence) detectedCategories.push('violencia');
       if (categories['violence/graphic']) detectedCategories.push('violencia gráfica');
-      if (categories.spam) detectedCategories.push('spam');
+      // Note: spam category may not be available in all API versions
+      if ('spam' in categories && (categories as any).spam) detectedCategories.push('spam');
       
       return {
         passed: false,

@@ -9,7 +9,8 @@ const DRIVE_FOLDER_ID = process.env.DRIVE_FOLDER_ID as string;
 
 export const POST = async (req: NextRequest) => {
   try {
-    const { transcripcion } = await req.json();
+    const body = await req.json() as { transcripcion?: string };
+    const { transcripcion } = body;
     if (!transcripcion) return NextResponse.json({ error: "Falta transcripción" }, { status: 400 });
 
     // Clasificación
@@ -39,7 +40,7 @@ export const POST = async (req: NextRequest) => {
       })
     });
 
-    const mcpResult = await mcpResponse.json();
+    const mcpResult = await mcpResponse.json() as { nuevo_doc_url?: string };
 
     return NextResponse.json({
       success: true,
