@@ -439,10 +439,19 @@ export async function generatePDF(options: PDFGeneratorOptions): Promise<PDFGene
 
     // Configurar puppeteer para entorno serverless (Vercel con @sparticuz/chromium)
     const browser = await puppeteer.launch({
-      args: chromium.args,
+      args: [
+        ...chromium.args,
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--single-process',
+        '--no-zygote',
+        '--disable-extensions'
+      ],
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
-      headless: chromium.headless,
+      headless: true,
       ignoreHTTPSErrors: true
     });
 
