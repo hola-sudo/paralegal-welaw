@@ -79,122 +79,88 @@ const baseStyles = {
 };
 
 /**
- * Template para Contrato Base - EVENTOS Y DECORACIÓN
+ * Template para Contrato Base - CAMPOS EXACTOS DEL .DOCX REAL
  */
 function createContratoBase(data: any) {
   return {
     content: [
       { text: 'CONTRATO BASE 3D PIXEL PERFECTION', style: 'header' },
-      { text: 'CONTRATO DE PRESTACIÓN DE SERVICIOS DE DECORACIÓN Y RENDERS 3D PARA EVENTOS', style: 'subheader' },
+      { text: 'ENCABEZADO', style: 'subheader' },
+      { text: 'CONTRATO DE PRESTACIÓN DE SERVICIOS DE RENDERIZACIÓN 3D', style: 'subheader' },
       
-      { text: '\nDATOS DEL EVENTO:', style: 'clausula' },
+      { text: '\nEntre 3D PIXEL PERFECTION (Emmanuel Meneses García, RFC—)', style: 'normal' },
+      { text: '— de aquí en adelante "3D Pixel Perfection" —', style: 'normal' },
+      
       { 
         text: [
-          'CLIENTE: ',
-          { text: data.NOMBRE_CLIENTE || '[NOMBRE DEL CLIENTE]', bold: true }
+          'y ',
+          { text: data.NOMBRE_CLIENTE || '{{NOMBRE_CLIENTE}}', bold: true },
+          ' RFC ',
+          { text: data.RFC_cliente || '{{RFC_cliente}}', bold: true }
         ], 
         style: 'normal' 
       },
+      { text: '— de aquí en adelante "El Planner".', style: 'normal' },
+
+      { text: '\nSECCIÓN 1: BÁSICOS DEL ACUERDO', style: 'clausula' },
+      
+      { text: '1.1 Qué es esto', style: 'subclausula' },
       { 
         text: [
-          'RFC: ',
-          { text: data.RFC_cliente || '[RFC DEL CLIENTE]', bold: true }
-        ], 
-        style: 'normal' 
-      },
-      { 
-        text: [
-          'EVENTO: ',
-          { text: data.NOMBRE_EVENTO || '[NOMBRE DEL EVENTO]', bold: true }
-        ], 
-        style: 'normal' 
-      },
-      { 
-        text: [
-          'TIPO DE EVENTO: ',
-          { text: data.EVENTO || '[TIPO DE EVENTO]', bold: true }
-        ], 
-        style: 'normal' 
-      },
-      { 
-        text: [
-          'FECHA DEL EVENTO: ',
-          { text: data.FECHA_EVENTO || '[DD/MM/AAAA]', bold: true }
-        ], 
-        style: 'normal' 
-      },
-      { 
-        text: [
-          'HORA: ',
-          { text: data['HH:MM'] || '[HH:MM]', bold: true }
-        ], 
-        style: 'normal' 
-      },
-      { 
-        text: [
-          'UBICACIÓN: ',
-          { text: data.UBICACION || '[UBICACIÓN DEL EVENTO]', bold: true }
+          'El Planner quiere que hagamos renders 3D del evento ',
+          { text: data.NOMBRE_EVENTO || '{{NOMBRE_EVENTO}}', bold: true },
+          ' para ',
+          { text: data.FECHA_EVENTO || '{{FECHA_EVENTO}}', bold: true },
+          ' en ',
+          { text: data.UBICACION || '{{UBICACIÓN}}', bold: true },
+          '.'
         ], 
         style: 'normal' 
       },
 
-      { text: '\nPARTES DEL CONTRATO:', style: 'clausula' },
+      { text: '3D Pixel Perfection prometemos:', style: 'normal' },
       { 
         text: [
-          'CONTRATANTE: ',
-          { text: data.NOMBRE_CLIENTE || '[NOMBRE DEL CLIENTE]', bold: true },
-          ', organizador del evento.'
+          'Renders fotorrealistas del evento ',
+          { text: data.EVENTO || '{{EVENTO}}', bold: true }
         ], 
         style: 'normal' 
       },
-      { 
-        text: [
-          'CONTRATADO: ',
-          { text: '3D PIXEL PERFECTION', bold: true },
-          ', empresa especializada en decoración de eventos y renders 3D profesionales.'
-        ], 
-        style: 'normal' 
-      },
+      { text: 'Archivos en alta resolución', style: 'normal' },
+      { text: 'Revisiones incluidas (hasta 3 rondas)', style: 'normal' },
+      { text: 'Entrega dentro del timeline acordado', style: 'normal' },
 
-      { text: 'PRIMERA: OBJETO DEL CONTRATO', style: 'clausula' },
-      { 
-        text: 'El presente contrato tiene por objeto la prestación de servicios de decoración integral para eventos, incluyendo diseño, montaje, renders 3D previos y supervisión del evento especificado.',
-        style: 'normal' 
-      },
+      { text: '1.2 Qué NO Cubre', style: 'subclausula' },
+      { text: '✗ Cambios estéticos (El Planner cambió de opinión) → Se cobran como cambios', style: 'normal' },
+      { text: '✗ Especificaciones no incluidas en este contrato', style: 'normal' },
+      { text: '✗ Renders adicionales fuera del paquete original', style: 'normal' },
 
-      { text: 'SEGUNDA: SERVICIOS INCLUIDOS', style: 'clausula' },
-      {
-        ul: [
-          'Diseño y renders 3D previos del evento',
-          'Decoración integral del salón',
-          'Montaje de centros de mesa y elementos decorativos',
-          'Instalación de mobiliario y estructuras especiales',
-          'Supervisión durante el evento',
-          'Desmontaje posterior'
-        ],
-        style: 'normal'
-      },
-
-      { text: 'TERCERA: FECHAS IMPORTANTES', style: 'clausula' },
+      { text: '1.3 Timeline', style: 'subclausula' },
       { 
         text: [
           'Fecha del evento: ',
-          { text: data.FECHA_EVENTO || '[DD/MM/AAAA]', bold: true },
-          '\nHora del evento: ',
-          { text: data['HH:MM'] || '[HH:MM]', bold: true },
-          '\nFecha de firma: ',
-          { text: data['DD/MM/AAAA'] || new Date().toLocaleDateString('es-ES'), bold: true }
-        ],
+          { text: data.FECHA_EVENTO || '{{FECHA_EVENTO}}', bold: true },
+          ' a las ',
+          { text: data['HH:MM'] || '{{HH:MM}}', bold: true }
+        ], 
         style: 'normal' 
       },
-
-      { text: 'CUARTA: RESPONSABILIDADES', style: 'clausula' },
       { 
-        text: 'Las especificaciones técnicas detalladas se encuentran en los anexos correspondientes. 3D PIXEL PERFECTION se compromete a ejecutar el montaje según las especificaciones acordadas.',
+        text: [
+          'Fecha de firma del contrato: ',
+          { text: data['DD/MM/AAAA'] || '{{DD/MM/AAAA}}', bold: true }
+        ], 
         style: 'normal' 
       },
 
-      { text: '\n\nFIRMAS:', style: 'clausula' },
+      { text: '\nSECCIÓN 2: DETALLES TÉCNICOS', style: 'clausula' },
+      { text: 'Las especificaciones técnicas completas se encuentran en los anexos:', style: 'normal' },
+      { text: '• ANEXO A - Especificaciones de montaje y medidas', style: 'normal' },
+      { text: '• ANEXO B - Renders y temas visuales', style: 'normal' },
+      { text: '• ANEXO C - Control de cambios y revisiones', style: 'normal' },
+      { text: '• ANEXO D - Entrega final y autorización', style: 'normal' },
+
+      { text: '\n\nFIRMAS DE CONFORMIDAD:', style: 'clausula' },
       
       {
         columns: [
@@ -202,8 +168,8 @@ function createContratoBase(data: any) {
             width: '50%',
             text: [
               '\n\n_________________________\n',
-              { text: data.NOMBRE_CLIENTE || '[NOMBRE DEL CLIENTE]', bold: true },
-              '\nCLIENTE'
+              { text: data.NOMBRE_CLIENTE || '{{NOMBRE_CLIENTE}}', bold: true },
+              '\n"El Planner"'
             ],
             style: 'firma'
           },
@@ -211,7 +177,7 @@ function createContratoBase(data: any) {
             width: '50%',
             text: [
               '\n\n_________________________\n',
-              { text: 'DIRECTOR GENERAL', bold: true },
+              { text: 'Emmanuel Meneses García', bold: true },
               '\n3D PIXEL PERFECTION'
             ],
             style: 'firma'
@@ -220,7 +186,10 @@ function createContratoBase(data: any) {
       },
 
       { 
-        text: `\nFecha de firma: ${data['DD/MM/AAAA'] || new Date().toLocaleDateString('es-ES')}`,
+        text: [
+          '\nFecha de firma: ',
+          { text: data['DD/MM/AAAA'] || new Date().toLocaleDateString('es-ES'), bold: true }
+        ],
         style: 'fecha' 
       }
     ],
@@ -232,93 +201,124 @@ function createContratoBase(data: any) {
 }
 
 /**
- * Template para Anexo A - ESPECIFICACIONES TÉCNICAS DE MONTAJE
+ * Template para Anexo A - ESPECIFICACIONES EXACTAS DEL .DOCX REAL (61 campos)
  */
 function createAnexoA(data: any) {
   return {
     content: [
       { text: 'ANEXO A - ESPECIFICACIONES TÉCNICAS DE MONTAJE', style: 'header' },
-      { text: 'DECORACIÓN INTEGRAL DEL EVENTO', style: 'subheader' },
+      { text: 'INSUMOS PARA RENDERS 3D', style: 'subheader' },
       
-      { text: '\nDATOS DEL EVENTO:', style: 'clausula' },
-      { text: `Cliente: ${data.NOMBRE_CLIENTE || '[NOMBRE CLIENTE]'}`, style: 'normal' },
-      { text: `Fecha del evento: ${data.FECHA_EVENTO || '[FECHA EVENTO]'}`, style: 'normal' },
-
-      { text: 'MEDIDAS DEL SALÓN:', style: 'clausula' },
-      { text: `Largo: ${data.MEDIDA_LARGO_SALON || '[LARGO]'} metros`, style: 'normal' },
-      { text: `Ancho: ${data.MEDIDA_ANCHO_SALON || '[ANCHO]'} metros`, style: 'normal' },
-      { text: `Alto: ${data.MEDIDA_ALTO_SALON || '[ALTO]'} metros`, style: 'normal' },
-
-      { text: 'CENTROS DE MESA:', style: 'clausula' },
-      { text: `Descripción: ${data.DESCRIPCION_CENTRO_MESA || '[DESCRIPCIÓN]'}`, style: 'normal' },
-      { text: `Base: ${data.BASE_CENTRO_MESA || '[TIPO DE BASE]'}`, style: 'normal' },
-      { text: `Medidas de base: ${data.MEDIDAS_BASE_CENTRO_MESA || '[MEDIDAS]'}`, style: 'normal' },
-      { text: `Flores: ${data.FLORES_CENTRO_MESA || '[TIPO DE FLORES]'}`, style: 'normal' },
-      { text: `Follaje: ${data.FOLLAJE_CENTRO_MESA || '[TIPO DE FOLLAJE]'}`, style: 'normal' },
-      { text: `Velas: ${data.DETALLES_VELAS_CENTRO_MESA || '[DETALLES DE VELAS]'}`, style: 'normal' },
-      { text: `Número de piezas: ${data.NUMERO_PIEZAS_CENTRO_MESA || '[CANTIDAD]'}`, style: 'normal' },
-
-      { text: 'MOBILIARIO:', style: 'clausula' },
-      { text: `Formato de mesa: ${data.FORMATO_MESA || '[REDONDA/RECTANGULAR]'}`, style: 'normal' },
-      { text: `Medidas de mesa: ${data.MEDIDAS_MESA || '[MEDIDAS]'}`, style: 'normal' },
-      { text: `Cantidad de sillas: ${data.CANTIDAD_SILLAS || '[NÚMERO]'}`, style: 'normal' },
-      { text: `Tipo de sillas: ${data.TIPO_SILLA || '[TIPO]'}`, style: 'normal' },
-      { text: `Recubrimiento: ${data.RECUBRIMIENTO_MESA || '[MANTELERÍA]'}`, style: 'normal' },
-      { text: `Montaje: ${data.DESCRIPCION_MONTAJE_MESA || '[DESCRIPCIÓN]'}`, style: 'normal' },
-
-      { text: 'ELEMENTOS DECORATIVOS:', style: 'clausula' },
-      { text: `Descripción: ${data.DESCRIPCION_ELEMENTO_DECORATIVO || '[ELEMENTOS]'}`, style: 'normal' },
-      { text: `Medidas: ${data.MEDIDAS_ELEMENTO_DECORATIVO || '[MEDIDAS]'}`, style: 'normal' },
-      { text: `Ubicación: ${data.UBICACION_ELEMENTO_DECORATIVO || '[UBICACIÓN]'}`, style: 'normal' },
-
-      { text: 'ESTRUCTURAS ESPECIALES:', style: 'clausula' },
-      
-      // Barra
-      data.HAY_BARRA === 'Sí' ? [
-        { text: 'BARRA:', style: 'subclausula' },
-        { text: `Diseño: ${data.DISENO_BARRA || '[DISEÑO]'}`, style: 'normal' },
-        { text: `Medidas: ${data.MEDIDAS_BARRA || '[MEDIDAS]'}`, style: 'normal' }
-      ] : { text: 'BARRA: No incluida', style: 'normal' },
-
-      // Pista de baile
-      data.HAY_PISTA === 'Sí' ? [
-        { text: 'PISTA DE BAILE:', style: 'subclausula' },
-        { text: `Diseño: ${data.DISENO_PISTA || '[DISEÑO]'}`, style: 'normal' },
-        { text: `Formato: ${data.FORMATO_PISTA || '[FORMATO]'}`, style: 'normal' },
-        { text: `Medidas: ${data.MEDIDAS_PISTA || '[MEDIDAS]'}`, style: 'normal' }
-      ] : { text: 'PISTA DE BAILE: No incluida', style: 'normal' },
-
-      // Candiles
-      data.HAY_CANDILES === 'Sí' ? [
-        { text: 'CANDILES:', style: 'subclausula' },
-        { text: `Diseño: ${data.DISENO_CANDILES || '[DISEÑO]'}`, style: 'normal' },
-        { text: `Medidas: ${data.MEDIDAS_CANDILES || '[MEDIDAS]'}`, style: 'normal' }
-      ] : { text: 'CANDILES: No incluidos', style: 'normal' },
-
-      // Entelado de techo
-      data.HAY_ENTELADO_TECHO === 'Sí' ? [
-        { text: 'ENTELADO DE TECHO:', style: 'subclausula' },
-        { text: `Diseño: ${data.DISENO_ENTELADO_TECHO || '[DISEÑO]'}`, style: 'normal' },
-        { text: `Medidas: ${data.MEDIDAS_ENTELADO_TECHO || '[MEDIDAS]'}`, style: 'normal' }
-      ] : { text: 'ENTELADO DE TECHO: No incluido', style: 'normal' },
-
-      { text: 'POSICIONAMIENTO:', style: 'clausula' },
-      { text: `Posición de mesas: ${data.POSICION_MESAS || '[DISTRIBUCIÓN]'}`, style: 'normal' },
-      { text: `Posición de pista: ${data.POSICION_PISTA || '[UBICACIÓN]'}`, style: 'normal' },
-      { text: `Posición de escenario: ${data.POSICION_ESCENARIO || '[UBICACIÓN]'}`, style: 'normal' },
-
-      { text: 'DOCUMENTACIÓN FOTOGRÁFICA:', style: 'clausula' },
-      { text: 'Se realizará seguimiento fotográfico de:', style: 'normal' },
-      {
-        ul: [
-          `Estado del salón (${data.NUMERO_FOTOS_ESTADO_SALON || 'X'} fotos)`,
-          `Layout general (${data.NUMERO_FOTOS_LAYOUT || 'X'} fotos)`,
-          `Centros de mesa (${data.NUMERO_FOTOS_CENTRO_MESA || 'X'} fotos)`,
-          `Montaje de mobiliario (${data.NUMERO_FOTOS_MONTAJE_MESA || 'X'} fotos)`,
-          `Elementos decorativos (${data.NUMERO_FOTOS_ELEMENTO_DECORATIVO || 'X'} fotos)`
+      { 
+        text: [
+          'Asunto: "INSUMOS — ',
+          { text: data.NOMBRE_CLIENTE || '{{NOMBRE_CLIENTE}}', bold: true },
+          ' — ',
+          { text: data.FECHA_EVENTO || '{{FECHA_EVENTO}}', bold: true },
+          '"'
         ],
-        style: 'normal'
-      }
+        style: 'clausula' 
+      },
+
+      { text: '\nMEDIDAS DEL SALÓN', style: 'clausula' },
+      { text: 'Archivos en formato pdf de los planos del salón con cotas (medidas):', style: 'normal' },
+      { text: `Largo (m): ${data.MEDIDA_LARGO_SALON || '{{MEDIDA_LARGO_SALON}}'}`, style: 'normal' },
+      { text: `Ancho (m): ${data.MEDIDA_ANCHO_SALON || '{{MEDIDA_ANCHO_SALON}}'}`, style: 'normal' },
+      { text: `Alto (m): ${data.MEDIDA_ALTO_SALON || '{{MEDIDA_ALTO_SALON}}'}`, style: 'normal' },
+      { text: `Número total de fotografías: ${data.NUMERO_FOTOS_SALON || '{{NUMERO_FOTOS_SALON}}'}`, style: 'normal' },
+
+      { text: '\nESTADO DEL SALÓN', style: 'clausula' },
+      { text: 'Fotografías y videos del estado actual del salón:', style: 'normal' },
+      { text: `Número total de fotografías entregadas: ${data.NUMERO_FOTOS_ESTADO_SALON || '{{NUMERO_FOTOS_ESTADO_SALON}}'}`, style: 'normal' },
+      { text: `Número total de videos entregados: ${data.NUMERO_VIDEOS_ESTADO_SALON || '{{NUMERO_VIDEOS_ESTADO_SALON}}'}`, style: 'normal' },
+
+      { text: '\nMESAS', style: 'clausula' },
+      { text: 'Tener referencia real de mesa con los siguientes datos:', style: 'normal' },
+      { text: `Formato de mesa (tipo y forma): ${data.FORMATO_MESA || '{{FORMATO_MESA}}'}`, style: 'normal' },
+      { text: `Medidas (largo, ancho, alto): ${data.MEDIDAS_MESA || '{{MEDIDAS_MESA}}'}`, style: 'normal' },
+      { text: `Recubrimiento de mesa (mantel, camino): ${data.RECUBRIMIENTO_MESA || '{{RECUBRIMIENTO_MESA}}'}`, style: 'normal' },
+
+      { text: '\nSILLAS', style: 'clausula' },
+      { text: `Cantidad de sillas: ${data.CANTIDAD_SILLAS || '{{CANTIDAD_SILLAS}}'}`, style: 'normal' },
+      { text: `Tipo de sillas: ${data.TIPO_SILLA || '{{TIPO_SILLA}}'}`, style: 'normal' },
+      { text: `Número de fotografías de sillas: ${data.NUMERO_FOTOS_SILLAS || '{{NUMERO_FOTOS_SILLAS}}'}`, style: 'normal' },
+
+      { text: '\nMONTAJE DE MESA', style: 'clausula' },
+      { text: `Descripción del montaje: ${data.DESCRIPCION_MONTAJE_MESA || '{{DESCRIPCION_MONTAJE_MESA}}'}`, style: 'normal' },
+      { text: `Número de fotografías del montaje: ${data.NUMERO_FOTOS_MONTAJE_MESA || '{{NUMERO_FOTOS_MONTAJE_MESA}}'}`, style: 'normal' },
+
+      { text: '\nCENTRO DE MESA', style: 'clausula' },
+      { text: `Descripción: ${data.DESCRIPCION_CENTRO_MESA || '{{DESCRIPCION_CENTRO_MESA}}'}`, style: 'normal' },
+      { text: `Número de piezas: ${data.NUMERO_PIEZAS_CENTRO_MESA || '{{NUMERO_PIEZAS_CENTRO_MESA}}'}`, style: 'normal' },
+      { text: `Número de fotografías: ${data.NUMERO_FOTOS_CENTRO_MESA || '{{NUMERO_FOTOS_CENTRO_MESA}}'}`, style: 'normal' },
+      { text: `Flores (rosas, crisantemos, etc.): ${data.FLORES_CENTRO_MESA || '{{FLORES_CENTRO_MESA}}'}`, style: 'normal' },
+      { text: `Follaje (dólar, eucalipto, etc.): ${data.FOLLAJE_CENTRO_MESA || '{{FOLLAJE_CENTRO_MESA}}'}`, style: 'normal' },
+      { text: `Tipo de Base (florero, jarrón, estructura, oasis, etc.): ${data.BASE_CENTRO_MESA || '{{BASE_CENTRO_MESA}}'}`, style: 'normal' },
+      { text: `Medidas de Base: ${data.MEDIDAS_BASE_CENTRO_MESA || '{{MEDIDAS_BASE_CENTRO_MESA}}'}`, style: 'normal' },
+      { text: `Velas (tipo, cantidad y estilo): ${data.DETALLES_VELAS_CENTRO_MESA || '{{DETALLES_VELAS_CENTRO_MESA}}'}`, style: 'normal' },
+      { text: `Fotografías de referencia de velas: ${data.NUMERO_FOTOS_VELAS_CENTRO_MESA || '{{NUMERO_FOTOS_VELAS_CENTRO_MESA}}'}`, style: 'normal' },
+
+      { text: '\nPISTA DE BAILE', style: 'clausula' },
+      { text: `Formato de pista: ${data.FORMATO_PISTA || '{{FORMATO_PISTA}}'}`, style: 'normal' },
+      { text: `Medidas: ${data.MEDIDAS_PISTA || '{{MEDIDAS_PISTA}}'}`, style: 'normal' },
+      { text: `Diseño: ${data.DISENO_PISTA || '{{DISENO_PISTA}}'}`, style: 'normal' },
+      { text: `Número de fotografías: ${data.NUMERO_FOTOS_PISTA || '{{NUMERO_FOTOS_PISTA}}'}`, style: 'normal' },
+
+      { text: '\nBARRA', style: 'clausula' },
+      { text: `¿Hay barra?: ${data.HAY_BARRA || '{{HAY_BARRA}}'}`, style: 'normal' },
+      ...(data.HAY_BARRA === 'Sí' || !data.HAY_BARRA ? [
+        { text: `Medidas: ${data.MEDIDAS_BARRA || '{{MEDIDAS_BARRA}}'}`, style: 'normal' },
+        { text: `Diseño: ${data.DISENO_BARRA || '{{DISENO_BARRA}}'}`, style: 'normal' },
+        { text: `Número de fotografías: ${data.NUMERO_FOTOS_BARRA || '{{NUMERO_FOTOS_BARRA}}'}`, style: 'normal' }
+      ] : []),
+
+      { text: '\nCONTRABARRA', style: 'clausula' },
+      { text: `¿Hay contrabarra?: ${data.HAY_CONTRABARRA || '{{HAY_CONTRABARRA}}'}`, style: 'normal' },
+      ...(data.HAY_CONTRABARRA === 'Sí' || !data.HAY_CONTRABARRA ? [
+        { text: `Medidas: ${data.MEDIDAS_CONTRABARRA || '{{MEDIDAS_CONTRABARRA}}'}`, style: 'normal' },
+        { text: `Diseño: ${data.DISENO_CONTRABARRA || '{{DISENO_CONTRABARRA}}'}`, style: 'normal' },
+        { text: `Número de fotografías: ${data.NUMERO_FOTOS_CONTRABARRA || '{{NUMERO_FOTOS_CONTRABARRA}}'}`, style: 'normal' }
+      ] : []),
+
+      { text: '\nESTRUCTURA DE JARDÍN', style: 'clausula' },
+      { text: `¿Hay estructura de jardín?: ${data.HAY_JARDIN_ESTRUCTURA || '{{HAY_JARDIN_ESTRUCTURA}}'}`, style: 'normal' },
+      ...(data.HAY_JARDIN_ESTRUCTURA === 'Sí' || !data.HAY_JARDIN_ESTRUCTURA ? [
+        { text: `Medidas: ${data.MEDIDAS_JARDIN_ESTRUCTURA || '{{MEDIDAS_JARDIN_ESTRUCTURA}}'}`, style: 'normal' },
+        { text: `Diseño: ${data.DISENO_JARDIN_ESTRUCTURA || '{{DISENO_JARDIN_ESTRUCTURA}}'}`, style: 'normal' },
+        { text: `Número de fotografías: ${data.NUMERO_FOTOS_JARDIN_ESTRUCTURA || '{{NUMERO_FOTOS_JARDIN_ESTRUCTURA}}'}`, style: 'normal' }
+      ] : []),
+
+      { text: '\nCANDILES', style: 'clausula' },
+      { text: `¿Hay candiles?: ${data.HAY_CANDILES || '{{HAY_CANDILES}}'}`, style: 'normal' },
+      ...(data.HAY_CANDILES === 'Sí' || !data.HAY_CANDILES ? [
+        { text: `Medidas: ${data.MEDIDAS_CANDILES || '{{MEDIDAS_CANDILES}}'}`, style: 'normal' },
+        { text: `Diseño: ${data.DISENO_CANDILES || '{{DISENO_CANDILES}}'}`, style: 'normal' },
+        { text: `Número de fotografías: ${data.NUMERO_FOTOS_CANDILES || '{{NUMERO_FOTOS_CANDILES}}'}`, style: 'normal' }
+      ] : []),
+
+      { text: '\nENTELADO DE TECHO', style: 'clausula' },
+      { text: `¿Hay entelado de techo?: ${data.HAY_ENTELADO_TECHO || '{{HAY_ENTELADO_TECHO}}'}`, style: 'normal' },
+      ...(data.HAY_ENTELADO_TECHO === 'Sí' || !data.HAY_ENTELADO_TECHO ? [
+        { text: `Medidas: ${data.MEDIDAS_ENTELADO_TECHO || '{{MEDIDAS_ENTELADO_TECHO}}'}`, style: 'normal' },
+        { text: `Diseño: ${data.DISENO_ENTELADO_TECHO || '{{DISENO_ENTELADO_TECHO}}'}`, style: 'normal' },
+        { text: `Número de fotografías: ${data.NUMERO_FOTOS_ENTELADO_TECHO || '{{NUMERO_FOTOS_ENTELADO_TECHO}}'}`, style: 'normal' }
+      ] : []),
+
+      { text: '\nELEMENTOS DECORATIVOS', style: 'clausula' },
+      { text: `Descripción: ${data.DESCRIPCION_ELEMENTO_DECORATIVO || '{{DESCRIPCION_ELEMENTO_DECORATIVO}}'}`, style: 'normal' },
+      { text: `Medidas: ${data.MEDIDAS_ELEMENTO_DECORATIVO || '{{MEDIDAS_ELEMENTO_DECORATIVO}}'}`, style: 'normal' },
+      { text: `Ubicación: ${data.UBICACION_ELEMENTO_DECORATIVO || '{{UBICACION_ELEMENTO_DECORATIVO}}'}`, style: 'normal' },
+      { text: `Elementos incluidos: ${data.ELEMENTOS_INCLUIDOS || '{{ELEMENTOS_INCLUIDOS}}'}`, style: 'normal' },
+      { text: `Número de fotografías: ${data.NUMERO_FOTOS_ELEMENTO_DECORATIVO || '{{NUMERO_FOTOS_ELEMENTO_DECORATIVO}}'}`, style: 'normal' },
+
+      { text: '\nLAYOUT Y POSICIONAMIENTO', style: 'clausula' },
+      { text: `Archivo de layout: ${data.ARCHIVO_LAYOUT || '{{ARCHIVO_LAYOUT}}'}`, style: 'normal' },
+      { text: `Posición de mesas: ${data.POSICION_MESAS || '{{POSICION_MESAS}}'}`, style: 'normal' },
+      { text: `Posición de elementos decorativos: ${data.POSICION_ELEMENTOS_DECORATIVOS || '{{POSICION_ELEMENTOS_DECORATIVOS}}'}`, style: 'normal' },
+      { text: `Posición de elementos en techo: ${data.POSICION_ELEMENTOS_TECHO || '{{POSICION_ELEMENTOS_TECHO}}'}`, style: 'normal' },
+      { text: `Posición de escenario: ${data.POSICION_ESCENARIO || '{{POSICION_ESCENARIO}}'}`, style: 'normal' },
+      { text: `Posición de pista: ${data.POSICION_PISTA || '{{POSICION_PISTA}}'}`, style: 'normal' },
+      { text: `Número de fotografías de layout: ${data.NUMERO_FOTOS_LAYOUT || '{{NUMERO_FOTOS_LAYOUT}}'}`, style: 'normal' }
     ].flat(),
     styles: baseStyles,
     defaultStyle: {
@@ -328,26 +328,18 @@ function createAnexoA(data: any) {
 }
 
 /**
- * Template para Anexo B - RENDERS Y TEMAS DEL EVENTO
+ * Template para Anexo B - RENDERS Y TEMAS EXACTOS DEL .DOCX REAL (13 campos)
  */
 function createAnexoB(data: any) {
   return {
     content: [
-      { text: 'ANEXO B - RENDERS Y TEMAS DEL EVENTO', style: 'header' },
-      { text: 'VISUALIZACIÓN 3D PREVIA', style: 'subheader' },
+      { text: 'ANEXO B - RENDERS Y TEMAS', style: 'header' },
+      { text: 'GESTIÓN DE RENDERS 3D', style: 'subheader' },
 
-      { text: 'DATOS DEL EVENTO:', style: 'clausula' },
-      { text: `Cliente: ${data.CLIENTE || data.NOMBRE_CLIENTE || '[NOMBRE CLIENTE]'}`, style: 'normal' },
-      { text: `Evento: ${data.NOMBRE_EVENTO || '[NOMBRE DEL EVENTO]'}`, style: 'normal' },
-      { text: `Fecha del evento: ${data.FECHA_EVENTO || '[FECHA EVENTO]'}`, style: 'normal' },
+      { text: `Evento: ${data.NOMBRE_EVENTO || '{{NOMBRE_EVENTO}}'}`, style: 'normal' },
+      { text: `Fecha del evento: ${data.FECHA_EVENTO || '{{FECHA_EVENTO}}'}`, style: 'normal' },
 
-      { text: 'FECHAS DE PROCESO:', style: 'clausula' },
-      { text: `Fecha cliente: ${data.FECHA_CLIENTE || '[FECHA CLIENTE]'}`, style: 'normal' },
-      { text: `Fecha Pixel: ${data.FECHA_PIXEL || '[FECHA PIXEL]'}`, style: 'normal' },
-      { text: `Representante Pixel: ${data.PIXEL_REPRESENTANTE || '[REPRESENTANTE]'}`, style: 'normal' },
-
-      { text: 'TEMAS Y ESTILOS DE RENDERS:', style: 'clausula' },
-      
+      { text: '\nTEMAS DE RENDERS', style: 'clausula' },
       {
         table: {
           headerRows: 1,
@@ -356,55 +348,62 @@ function createAnexoB(data: any) {
             [
               { text: 'TEMA', style: 'clausula' },
               { text: 'DESCRIPCIÓN', style: 'clausula' },
-              { text: 'CONFIRMADO', style: 'clausula' },
-              { text: 'EN RENDERS', style: 'clausula' }
+              { text: 'EN RENDERS', style: 'clausula' },
+              { text: 'CONFIRMADO', style: 'clausula' }
             ],
             [
               'Tema 1',
-              data.TEMA_1 || '[DESCRIPCIÓN DEL TEMA 1]',
-              data.CONFIRMADO_1 || '[SÍ/NO]',
-              data.EN_RENDERS_1 || '[ESTADO]'
+              data.TEMA_1 || '{{TEMA_1}}',
+              data.EN_RENDERS_1 || '{{EN_RENDERS_1}}',
+              data.CONFIRMADO_1 || '{{CONFIRMADO_1}}'
             ],
             [
               'Tema 2',
-              data.TEMA_2 || '[DESCRIPCIÓN DEL TEMA 2]',
-              data.CONFIRMADO_2 || '[SÍ/NO]',
-              data.EN_RENDERS_2 || '[ESTADO]'
+              data.TEMA_2 || '{{TEMA_2}}',
+              data.EN_RENDERS_2 || '{{EN_RENDERS_2}}',
+              data.CONFIRMADO_2 || '{{CONFIRMADO_2}}'
             ]
           ]
         },
         style: 'normal'
       },
 
-      { text: '\nPROCESO DE RENDERS:', style: 'clausula' },
+      { text: '\nOBSERVACIONES ADICIONALES:', style: 'clausula' },
+      { text: data['Agregar más si necesario'] || '{{Agregar más si necesario}}', style: 'normal' },
+
+      { text: '\nINFORMACIÓN DE CONTACTO Y FECHAS', style: 'clausula' },
+      
       {
-        ol: [
-          'Briefing inicial con el cliente',
-          'Creación de renders 3D preliminares',
-          'Revisión y ajustes con el cliente',
-          'Renders finales para aprobación',
-          'Entrega de archivos digitales'
-        ],
+        table: {
+          headerRows: 1,
+          widths: ['*', '*'],
+          body: [
+            [
+              { text: 'CLIENTE', style: 'clausula' },
+              { text: '3D PIXEL PERFECTION', style: 'clausula' }
+            ],
+            [
+              `Nombre: ${data.CLIENTE || '{{CLIENTE}}'}`,
+              `Representante: ${data.PIXEL_REPRESENTANTE || '{{PIXEL_REPRESENTANTE}}'}`
+            ],
+            [
+              `Fecha: ${data.FECHA_CLIENTE || '{{FECHA_CLIENTE}}'}`,
+              `Fecha: ${data.FECHA_PIXEL || '{{FECHA_PIXEL}}'}`
+            ],
+            [
+              'Firma: _________________',
+              'Firma: _________________'
+            ]
+          ]
+        },
         style: 'normal'
       },
 
-      { text: 'ENTREGABLES:', style: 'clausula' },
-      {
-        ul: [
-          'Renders 3D en alta resolución',
-          'Vistas desde múltiples ángulos',
-          'Archivos digitales en formato JPG/PNG',
-          'Video recorrido 360° (opcional)',
-          'Versión impresa para presentación'
-        ],
-        style: 'normal'
-      },
-
-      { text: 'NOTAS IMPORTANTES:', style: 'clausula' },
-      { 
-        text: 'Los renders se crean basándose en las especificaciones del Anexo A. Cualquier cambio posterior puede afectar el cronograma de entrega.',
-        style: 'normal' 
-      }
+      { text: '\nNOTAS IMPORTANTES:', style: 'clausula' },
+      { text: '• Los temas confirmados procesan a renders 3D', style: 'normal' },
+      { text: '• Cualquier cambio posterior requiere nueva aprobación', style: 'normal' },
+      { text: '• Los renders se basan en las especificaciones del Anexo A', style: 'normal' },
+      { text: '• Tiempo estimado de renders: 5-7 días hábiles', style: 'normal' }
     ],
     styles: baseStyles,
     defaultStyle: {
@@ -414,20 +413,18 @@ function createAnexoB(data: any) {
 }
 
 /**
- * Template para Anexo C - CONTROL DE CAMBIOS Y REVISIONES
+ * Template para Anexo C - CONTROL DE CAMBIOS EXACTO DEL .DOCX REAL (32 campos)
  */
 function createAnexoC(data: any) {
   return {
     content: [
-      { text: 'ANEXO C - CONTROL DE CAMBIOS Y REVISIONES', style: 'header' },
-      { text: 'GESTIÓN DE MODIFICACIONES AL PROYECTO', style: 'subheader' },
+      { text: 'ANEXO C - CONTROL DE CAMBIOS', style: 'header' },
+      { text: 'GESTIÓN DE RONDAS DE REVISIÓN', style: 'subheader' },
 
-      { text: 'INFORMACIÓN DEL EVENTO:', style: 'clausula' },
-      { text: `Evento: ${data.NOMBRE_EVENTO || '[NOMBRE DEL EVENTO]'}`, style: 'normal' },
-      { text: `Ronda de revisión: ${data.RONDA || '[NÚMERO DE RONDA]'}`, style: 'normal' },
-      { text: `Total de cambios en esta ronda: ${data.TOTAL_CAMBIOS_RONDA || '[CANTIDAD]'}`, style: 'normal' },
+      { text: `Ronda #: ${data.RONDA || '{{RONDA}}'}`, style: 'clausula' },
+      { text: `Evento: ${data.NOMBRE_EVENTO || '{{NOMBRE_EVENTO}}'}`, style: 'normal' },
 
-      { text: 'REGISTRO DE CAMBIOS:', style: 'clausula' },
+      { text: '\nREGISTRO DETALLADO DE CAMBIOS', style: 'clausula' },
       
       {
         table: {
@@ -436,56 +433,80 @@ function createAnexoC(data: any) {
           body: [
             [
               { text: '#', style: 'clausula' },
-              { text: 'DESCRIPCIÓN DEL CAMBIO', style: 'clausula' },
+              { text: 'CAMBIO SOLICITADO', style: 'clausula' },
               { text: 'ESTADO ACTUAL', style: 'clausula' },
               { text: 'ESTADO SOLICITADO', style: 'clausula' },
               { text: 'EJECUTADO', style: 'clausula' }
             ],
-            ...[1,2,3,4,5,6,7].map(num => [
-              num.toString(),
-              data[`CAMBIO_${num}`] || '[DESCRIPCIÓN DEL CAMBIO]',
-              data[`ESTADO_ACTUAL_${num}`] || '[ESTADO ACTUAL]',
-              data[`ESTADO_SOLICITADO_${num}`] || '[ESTADO SOLICITADO]',
-              data[`EJECUTADO_${num}`] || '[SÍ/NO]'
-            ])
+            [
+              '1',
+              data.CAMBIO_1 || '{{CAMBIO_1}}',
+              data.ESTADO_ACTUAL_1 || '{{ESTADO_ACTUAL_1}}',
+              data.ESTADO_SOLICITADO_1 || '{{ESTADO_SOLICITADO_1}}',
+              data.EJECUTADO_1 || '{{EJECUTADO_1}}'
+            ],
+            [
+              '2',
+              data.CAMBIO_2 || '{{CAMBIO_2}}',
+              data.ESTADO_ACTUAL_2 || '{{ESTADO_ACTUAL_2}}',
+              data.ESTADO_SOLICITADO_2 || '{{ESTADO_SOLICITADO_2}}',
+              data.EJECUTADO_2 || '{{EJECUTADO_2}}'
+            ],
+            [
+              '3',
+              data.CAMBIO_3 || '{{CAMBIO_3}}',
+              data.ESTADO_ACTUAL_3 || '{{ESTADO_ACTUAL_3}}',
+              data.ESTADO_SOLICITADO_3 || '{{ESTADO_SOLICITADO_3}}',
+              data.EJECUTADO_3 || '{{EJECUTADO_3}}'
+            ],
+            [
+              '4',
+              data.CAMBIO_4 || '{{CAMBIO_4}}',
+              data.ESTADO_ACTUAL_4 || '{{ESTADO_ACTUAL_4}}',
+              data.ESTADO_SOLICITADO_4 || '{{ESTADO_SOLICITADO_4}}',
+              data.EJECUTADO_4 || '{{EJECUTADO_4}}'
+            ],
+            [
+              '5',
+              data.CAMBIO_5 || '{{CAMBIO_5}}',
+              data.ESTADO_ACTUAL_5 || '{{ESTADO_ACTUAL_5}}',
+              data.ESTADO_SOLICITADO_5 || '{{ESTADO_SOLICITADO_5}}',
+              data.EJECUTADO_5 || '{{EJECUTADO_5}}'
+            ],
+            [
+              '6',
+              data.CAMBIO_6 || '{{CAMBIO_6}}',
+              data.ESTADO_ACTUAL_6 || '{{ESTADO_ACTUAL_6}}',
+              data.ESTADO_SOLICITADO_6 || '{{ESTADO_SOLICITADO_6}}',
+              data.EJECUTADO_6 || '{{EJECUTADO_6}}'
+            ],
+            [
+              '7',
+              data.CAMBIO_7 || '{{CAMBIO_7}}',
+              data.ESTADO_ACTUAL_7 || '{{ESTADO_ACTUAL_7}}',
+              data.ESTADO_SOLICITADO_7 || '{{ESTADO_SOLICITADO_7}}',
+              data.EJECUTADO_7 || '{{EJECUTADO_7}}'
+            ]
           ]
         },
         style: 'normal'
       },
 
-      { text: '\nAPROBACIÓN DEL CLIENTE:', style: 'clausula' },
-      { text: `¿Cliente acepta la ronda?: ${data.CLIENTE_ACEPTA_RONDA || '[SÍ/NO]'}`, style: 'normal' },
+      { text: '\nRESUMEN DE LA RONDA', style: 'clausula' },
+      { text: `Total de cambios en esta ronda: ${data.TOTAL_CAMBIOS_RONDA || '{{TOTAL_CAMBIOS_RONDA}}'}`, style: 'normal' },
+      { text: `¿Cliente acepta la ronda?: ${data.CLIENTE_ACEPTA_RONDA || '{{CLIENTE_ACEPTA_RONDA}}'}`, style: 'normal' },
 
-      { text: 'POLÍTICAS DE CAMBIOS:', style: 'clausula' },
-      {
-        ul: [
-          'Se permiten hasta 3 rondas de revisiones sin costo adicional',
-          'Cambios que requieran nuevos materiales serán cotizados por separado',
-          'Modificaciones estructurales pueden afectar el cronograma',
-          'Los cambios deben ser solicitados por escrito',
-          'Cada ronda debe ser aprobada completamente antes de continuar'
-        ],
-        style: 'normal'
-      },
+      { text: '\nPROCESO DE RONDAS', style: 'clausula' },
+      { text: '1. Cliente revisa renders y solicita cambios específicos', style: 'normal' },
+      { text: '2. 3D Pixel Perfection evalúa factibilidad técnica', style: 'normal' },
+      { text: '3. Se ejecutan cambios aprobados', style: 'normal' },
+      { text: '4. Cliente revisa y acepta o solicita nueva ronda', style: 'normal' },
+      { text: '5. Máximo 4 rondas incluidas sin costo adicional', style: 'normal' },
 
-      { text: 'PROCESO DE REVISIÓN:', style: 'clausula' },
-      {
-        ol: [
-          'Cliente solicita cambios específicos',
-          'Evaluación técnica y de costos por parte de 3D Pixel',
-          'Presentación de propuesta de modificación',
-          'Aprobación o ajustes por parte del cliente',
-          'Ejecución de cambios aprobados',
-          'Verificación y cierre de ronda'
-        ],
-        style: 'normal'
-      },
-
-      { text: 'OBSERVACIONES:', style: 'clausula' },
-      { 
-        text: 'Cualquier cambio solicitado después de la fecha límite establecida puede generar costos adicionales y modificaciones al cronograma de entrega.',
-        style: 'normal' 
-      }
+      { text: '\nIMPORTANTE:', style: 'clausula' },
+      { text: '• Cada cambio debe estar claramente definido', style: 'normal' },
+      { text: '• Solo se procede cuando toda la ronda esté aceptada', style: 'normal' },
+      { text: '• Cambios adicionales pueden generar costos extras', style: 'normal' }
     ],
     styles: baseStyles,
     defaultStyle: {
@@ -495,118 +516,98 @@ function createAnexoC(data: any) {
 }
 
 /**
- * Template para Anexo D - ENTREGA FINAL
+ * Template para Anexo D - ENTREGA FINAL EXACTO DEL .DOCX REAL (21 campos)
  */
 function createAnexoD(data: any) {
   return {
     content: [
       { text: 'ANEXO D - ENTREGA FINAL', style: 'header' },
-      { text: 'CIERRE Y DOCUMENTACIÓN DEL EVENTO', style: 'subheader' },
+      { text: 'AUTORIZACIÓN DE PAGO Y CIERRE DE PROYECTO', style: 'subheader' },
 
-      { text: 'INFORMACIÓN DEL EVENTO:', style: 'clausula' },
-      { text: `Cliente: ${data.CLIENTE_FINAL || data.NOMBRE_CLIENTE || '[NOMBRE CLIENTE]'}`, style: 'normal' },
-      { text: `Evento: ${data.EVENTO_FINAL || data.NOMBRE_EVENTO || '[NOMBRE DEL EVENTO]'}`, style: 'normal' },
-      { text: `Fecha del evento: ${data.FECHA_EVENTO_FINAL || data.FECHA_EVENTO || '[FECHA EVENTO]'}`, style: 'normal' },
+      { text: `Evento: ${data.NOMBRE_EVENTO || '{{NOMBRE_EVENTO}}'}`, style: 'normal' },
+      { text: `Fecha de entrega: ${data.FECHA_ENTREGA || '{{FECHA_ENTREGA}}'}`, style: 'normal' },
 
-      { text: 'FECHAS DE ENTREGA:', style: 'clausula' },
-      { text: `Fecha de entrega cliente: ${data.FECHA_ENTREGA_CLIENTE || '[FECHA CLIENTE]'}`, style: 'normal' },
-      { text: `Fecha de entrega Pixel: ${data.FECHA_ENTREGA_PIXEL || '[FECHA PIXEL]'}`, style: 'normal' },
+      { text: '\nDETALLES DE ENTREGA', style: 'clausula' },
+      { text: `Cantidad de renders entregados: ${data.CANTIDAD_RENDERS_ENTREGADOS || '{{CANTIDAD_RENDERS_ENTREGADOS}}'}`, style: 'normal' },
+      { text: `Paquete contratado: ${data.PAQUETE || '{{PAQUETE}}'}`, style: 'normal' },
 
-      { text: 'RESPONSABLES:', style: 'clausula' },
-      { text: `Representante cliente: ${data.REPRESENTANTE_CLIENTE_FINAL || '[REPRESENTANTE CLIENTE]'}`, style: 'normal' },
-      { text: `Representante Pixel: ${data.REPRESENTANTE_PIXEL_FINAL || '[REPRESENTANTE PIXEL]'}`, style: 'normal' },
-
-      { text: 'ENTREGABLES FINALES:', style: 'clausula' },
+      { text: '\nVERIFICACIÓN DE CALIDAD', style: 'clausula' },
+      
       {
         table: {
           headerRows: 1,
-          widths: ['*', '*', '*'],
+          widths: ['*', 'auto'],
           body: [
             [
-              { text: 'CONCEPTO', style: 'clausula' },
-              { text: 'CANTIDAD', style: 'clausula' },
-              { text: 'ESTADO', style: 'clausula' }
+              { text: 'CRITERIO DE CALIDAD', style: 'clausula' },
+              { text: 'CUMPLE', style: 'clausula' }
             ],
             [
-              'Renders finales digitales',
-              data.CANTIDAD_RENDERS_FINALES || '[CANTIDAD]',
-              data.ESTADO_RENDERS || 'ENTREGADO'
+              'Formatos correctos (JPG, PNG alta resolución)',
+              data.FORMATOS_CORRECTOS || '{{FORMATOS_CORRECTOS}}'
             ],
             [
-              'Archivos fuente del proyecto',
-              data.CANTIDAD_ARCHIVOS_FUENTE || '1 set',
-              data.ESTADO_ARCHIVOS || 'ENTREGADO'
+              'Resolución alta (mínimo 1920x1080)',
+              data.RESOLUCION_ALTA || '{{RESOLUCION_ALTA}}'
             ],
             [
-              'Video recorrido 360°',
-              data.CANTIDAD_VIDEOS || '[SÍ/NO]',
-              data.ESTADO_VIDEO || '[ESTADO]'
-            ],
-            [
-              'Fotografías del montaje',
-              data.CANTIDAD_FOTOS_MONTAJE || '[CANTIDAD]',
-              data.ESTADO_FOTOS || '[ESTADO]'
-            ],
-            [
-              'Documentación técnica',
-              data.CANTIDAD_DOCUMENTOS || '1 set',
-              data.ESTADO_DOCUMENTOS || 'ENTREGADO'
+              'Sin defectos visuales aparentes',
+              data.DEFECTOS_VISUALES || '{{DEFECTOS_VISUALES}}'
             ]
           ]
         },
         style: 'normal'
       },
 
-      { text: 'CONFORMIDAD Y ACEPTACIÓN:', style: 'clausula' },
-      { text: `Evento ejecutado conforme: ${data.EVENTO_CONFORME || '[SÍ/NO]'}`, style: 'normal' },
-      { text: `Observaciones del cliente: ${data.OBSERVACIONES_CLIENTE || '[OBSERVACIONES]'}`, style: 'normal' },
-      { text: `Calificación del servicio: ${data.CALIFICACION_SERVICIO || '[1-10]'}`, style: 'normal' },
+      { text: '\nCAMBIOS EJECUTADOS', style: 'clausula' },
+      { text: `Total de cambios ejecutados: ${data.CAMBIOS_EJECUTADOS || '{{CAMBIOS_EJECUTADOS}}'}`, style: 'normal' },
+      { text: `Cambio 1: ${data.CAMBIO_1 || '{{CAMBIO_1}}'}`, style: 'normal' },
+      { text: `Cambio 2: ${data.CAMBIO_2 || '{{CAMBIO_2}}'}`, style: 'normal' },
+      { text: `Cambio 3: ${data.CAMBIO_3 || '{{CAMBIO_3}}'}`, style: 'normal' },
 
-      { text: 'DESMONTAJE:', style: 'clausula' },
-      { text: `Fecha de desmontaje: ${data.FECHA_DESMONTAJE || '[FECHA]'}`, style: 'normal' },
-      { text: `Elementos retirados: ${data.ELEMENTOS_RETIRADOS || '[LISTADO]'}`, style: 'normal' },
-      { text: `Estado del salón al retiro: ${data.ESTADO_SALON_RETIRO || '[CONDICIÓN]'}`, style: 'normal' },
+      { text: '\nMOTIVOS DE CAMBIOS', style: 'clausula' },
+      { text: `Motivo 1: ${data.MOTIVO_1 || '{{MOTIVO_1}}'}`, style: 'normal' },
+      { text: `Motivo 2: ${data.MOTIVO_2 || '{{MOTIVO_2}}'}`, style: 'normal' },
+      { text: `Motivo 3: ${data.MOTIVO_3 || '{{MOTIVO_3}}'}`, style: 'normal' },
 
-      { text: 'GARANTÍAS POST-EVENTO:', style: 'clausula' },
+      { text: '\nINFORMACIÓN FINANCIERA', style: 'clausula' },
+      { text: `Costo del proyecto: ${data.COSTO || '{{COSTO}}'}`, style: 'normal' },
+      { text: `Total a pagar: ${data.TOTAL || '{{TOTAL}}'}`, style: 'normal' },
+      { text: `¿Cliente autoriza el pago?: ${data.AUTORIZA_PAGO || '{{AUTORIZA_PAGO}}'}`, style: 'normal' },
+
+      { text: '\nRONDA 4 (Si aplica)', style: 'clausula' },
+      { text: `Costo adicional Ronda 4: ${data.COSTO_RONDA_4 || '{{COSTO_RONDA_4}}'}`, style: 'normal' },
+      { text: `¿Autoriza pago Ronda 4?: ${data.AUTORIZA_PAGO_RONDA_4 || '{{AUTORIZA_PAGO_RONDA_4}}'}`, style: 'normal' },
+
+      { text: '\nFIRMA Y CONFORMIDAD', style: 'clausula' },
+      
       {
-        ul: [
-          'Soporte técnico por 30 días para archivos digitales',
-          'Garantía de satisfacción en la ejecución del montaje',
-          'Disponibilidad para eventos futuros con descuentos especiales',
-          'Mantenimiento de archivos del proyecto por 2 años'
-        ],
+        table: {
+          headerRows: 1,
+          widths: ['*', '*'],
+          body: [
+            [
+              { text: 'CLIENTE', style: 'clausula' },
+              { text: '3D PIXEL PERFECTION', style: 'clausula' }
+            ],
+            [
+              `Firma: ${data.FIRMA_CLIENTE || '{{FIRMA_CLIENTE}}'}`,
+              'Firma: _________________'
+            ],
+            [
+              `Fecha: ${data.FECHA_CLIENTE || '{{FECHA_CLIENTE}}'}`,
+              `Fecha: ${data.FECHA_ENTREGA || new Date().toLocaleDateString('es-ES')}`
+            ]
+          ]
+        },
         style: 'normal'
       },
 
-      { text: 'FIRMAS DE CONFORMIDAD:', style: 'clausula' },
-      
-      {
-        columns: [
-          {
-            width: '50%',
-            text: [
-              '\n\n_________________________\n',
-              { text: data.REPRESENTANTE_CLIENTE_FINAL || data.NOMBRE_CLIENTE || '[REPRESENTANTE CLIENTE]', bold: true },
-              '\nCLIENTE\nCONFORME'
-            ],
-            style: 'firma'
-          },
-          {
-            width: '50%',
-            text: [
-              '\n\n_________________________\n',
-              { text: data.REPRESENTANTE_PIXEL_FINAL || 'DIRECTOR GENERAL', bold: true },
-              '\n3D PIXEL PERFECTION\nCONFORME'
-            ],
-            style: 'firma'
-          }
-        ]
-      },
-
-      { 
-        text: `\nFecha de cierre: ${data.FECHA_ENTREGA_PIXEL || new Date().toLocaleDateString('es-ES')}`,
-        style: 'fecha' 
-      }
+      { text: '\nPROCESO COMPLETADO', style: 'clausula' },
+      { text: '• Cliente ha recibido todos los renders en formato solicitado', style: 'normal' },
+      { text: '• Calidad verificada y aprobada por el cliente', style: 'normal' },
+      { text: '• Pago autorizado y proyecto cerrado exitosamente', style: 'normal' },
+      { text: '• Soporte post-entrega disponible por 30 días', style: 'normal' }
     ],
     styles: baseStyles,
     defaultStyle: {
