@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { processTranscript } from '../src/agent';
-import { DocumentType } from '../src/schemas';
+import { processTranscriptConversational } from '../src/agent-real';
+import { DocumentType } from '../src/schemas-real';
 
 // Validar variables de entorno requeridas
 const requiredEnvVars = {
@@ -57,8 +57,8 @@ export default async function handler(
       return res.status(400).json({ error: "Falta transcripción en el cuerpo de la petición" });
     }
 
-    // Usamos la implementación robusta con schemas y guardrails
-    const result = await processTranscript(transcripcion);
+    // Usamos la implementación conversacional real
+    const result = await processTranscriptConversational(transcripcion);
     
     // Si los guardrails bloquearon el contenido, retornamos error
     if (!result.guardrails.overall_passed) {
@@ -66,6 +66,18 @@ export default async function handler(
         error: "Contenido bloqueado por medidas de seguridad",
         warnings: result.guardrails.pii.warnings.concat(result.guardrails.moderation.warnings),
         blocked: true
+      });
+    }
+
+    // Si necesita seguimiento, retornamos las preguntas
+    if (result.needsFollowUp && result.followUpQuestions) {
+      return res.status(200).json({
+        success: false,
+        needsFollowUp: true,
+        tipo_documento: result.tipo_documento,
+        datos_parciales: result.datos,
+        preguntas_faltantes: result.followUpQuestions,
+        mensaje: `He extraído información parcial. Para completar el ${result.tipo_documento}, necesito que me proporciones:\n\n${result.followUpQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n')}\n\nPuedes responder con la información faltante o usar /api/chat para una experiencia conversacional completa.`
       });
     }
 

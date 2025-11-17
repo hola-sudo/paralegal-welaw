@@ -4,6 +4,9 @@
     "api/process.ts": {
       "maxDuration": 30
     },
+    "api/chat.ts": {
+      "maxDuration": 30
+    },
     "api/health.ts": {
       "maxDuration": 10
     }
@@ -11,6 +14,14 @@
   "rewrites": [
     {
       "source": "/",
+      "destination": "/public/demo.html"
+    },
+    {
+      "source": "/demo",
+      "destination": "/public/demo.html"
+    },
+    {
+      "source": "/old",
       "destination": "/public/index.html"
     }
   ],
