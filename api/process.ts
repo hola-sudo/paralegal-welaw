@@ -94,10 +94,14 @@ export default async function handler(
         "Authorization": `Bearer ${MCP_API_KEY}` 
       },
       body: JSON.stringify({
-        accion: "guardar",
-        template_name: templateName,
-        folder_id: DRIVE_FOLDER_ID,
-        replacements: replacements
+        jsonrpc: "2.0",
+        method: "create_document",
+        params: {
+          template_name: templateName,
+          folder_id: DRIVE_FOLDER_ID,
+          replacements: replacements
+        },
+        id: Date.now()
       })
     });
 
