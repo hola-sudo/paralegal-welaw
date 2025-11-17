@@ -102,9 +102,23 @@ export default async function handler(
 
     const mcpResult = await mcpResponse.json() as { nuevo_doc_url?: string; error?: string };
 
+    // Logging detallado para debugging
+    console.log('MCP Response Status:', mcpResponse.status);
+    console.log('MCP Response Headers:', Object.fromEntries(mcpResponse.headers.entries()));
+    console.log('MCP Result:', JSON.stringify(mcpResult, null, 2));
+
+    if (!mcpResponse.ok) {
+      return res.status(500).json({
+        error: `Error al crear documento en Google Drive: HTTP ${mcpResponse.status}`,
+        details: mcpResult,
+        mcp_response: await mcpResponse.text().catch(() => 'Could not read response text')
+      });
+    }
+
     if (mcpResult.error) {
       return res.status(500).json({
-        error: `Error al crear documento en Google Drive: ${mcpResult.error}`
+        error: `Error al crear documento en Google Drive: ${JSON.stringify(mcpResult.error)}`,
+        full_response: mcpResult
       });
     }
 
