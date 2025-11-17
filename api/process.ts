@@ -106,12 +106,46 @@ export default async function handler(
       })
     });
 
-    const mcpResult = await mcpResponse.json() as { nuevo_doc_url?: string; error?: string };
+    // Manejar Server-Sent Events (SSE) de MCP
+    let mcpResult: any = {};
+    
+    if (mcpResponse.headers.get('content-type')?.includes('text/event-stream')) {
+      // Procesar event stream
+      const responseText = await mcpResponse.text();
+      console.log('MCP SSE Response:', responseText);
+      
+      // Parsear eventos SSE
+      const events = responseText.split('\n\n').filter(Boolean);
+      for (const event of events) {
+        const lines = event.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const eventData = JSON.parse(line.slice(6)); // Remover "data: "
+              console.log('Parsed SSE data:', eventData);
+              
+              if (eventData.result) {
+                mcpResult = eventData.result;
+              } else if (eventData.error) {
+                mcpResult = { error: eventData.error };
+              } else {
+                mcpResult = eventData;
+              }
+            } catch (parseError) {
+              console.log('Could not parse SSE line:', line);
+            }
+          }
+        }
+      }
+    } else {
+      // Respuesta JSON normal
+      mcpResult = await mcpResponse.json();
+    }
 
     // Logging detallado para debugging
     console.log('MCP Response Status:', mcpResponse.status);
     console.log('MCP Response Headers:', Object.fromEntries(mcpResponse.headers.entries()));
-    console.log('MCP Result:', JSON.stringify(mcpResult, null, 2));
+    console.log('MCP Final Result:', JSON.stringify(mcpResult, null, 2));
 
     if (!mcpResponse.ok) {
       return res.status(500).json({

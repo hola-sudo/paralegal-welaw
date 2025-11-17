@@ -159,10 +159,46 @@ async function generateDocument(
       })
     });
 
-    const mcpResult = await mcpResponse.json() as { nuevo_doc_url?: string; error?: string };
+    // Manejar Server-Sent Events (SSE) de MCP
+    let mcpResult: any = {};
+    
+    if (mcpResponse.headers.get('content-type')?.includes('text/event-stream')) {
+      // Procesar event stream
+      const responseText = await mcpResponse.text();
+      console.log('MCP SSE Response (Chat):', responseText);
+      
+      // Parsear eventos SSE
+      const events = responseText.split('\n\n').filter(Boolean);
+      for (const event of events) {
+        const lines = event.split('\n');
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const eventData = JSON.parse(line.slice(6));
+              console.log('Parsed SSE data (Chat):', eventData);
+              
+              if (eventData.result) {
+                mcpResult = eventData.result;
+              } else if (eventData.error) {
+                mcpResult = { error: eventData.error };
+              } else {
+                mcpResult = eventData;
+              }
+            } catch (parseError) {
+              console.log('Could not parse SSE line (Chat):', line);
+            }
+          }
+        }
+      }
+    } else {
+      // Respuesta JSON normal
+      mcpResult = await mcpResponse.json();
+    }
+
+    console.log('MCP Final Result (Chat):', JSON.stringify(mcpResult, null, 2));
 
     if (mcpResult.error) {
-      throw new Error(`Error de MCP: ${mcpResult.error}`);
+      throw new Error(`Error de MCP: ${JSON.stringify(mcpResult.error)}`);
     }
 
     // Actualizar estado como completado
