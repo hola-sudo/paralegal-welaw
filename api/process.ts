@@ -89,7 +89,8 @@ export default async function handler(
     const mcpResponse = await fetch(MCP_ENDPOINT, {
       method: "POST",
       headers: { 
-        "Content-Type": "application/json", 
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream", 
         "Authorization": `Bearer ${MCP_API_KEY}` 
       },
       body: JSON.stringify({
