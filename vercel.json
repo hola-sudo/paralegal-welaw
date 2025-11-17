@@ -8,22 +8,10 @@
       "maxDuration": 10
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/api/health",
-      "dest": "/api/health"
-    },
-    {
-      "src": "/api/process",
-      "dest": "/api/process"
-    },
-    {
-      "src": "/",
-      "dest": "/public/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/$1"
+      "source": "/",
+      "destination": "/public/index.html"
     }
   ],
   "headers": [

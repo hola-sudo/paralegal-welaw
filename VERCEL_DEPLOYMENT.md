@@ -286,9 +286,9 @@ El script `npm run pre-deploy` ejecuta las siguientes verificaciones:
 - **Desarrollo**: `@vercel/node`, `typescript`
 
 ### Configuraciones validadas:
-- **Functions**: Timeouts y configuración correcta
-- **CORS**: Headers configurados globalmente
-- **Routes**: Mapeo de rutas correcto
+- **Functions**: Timeouts y configuración correcta (30s process, 10s health)
+- **CORS**: Headers configurados globalmente para /api/*
+- **Rewrites**: Configuración moderna de Vercel (sin routes)
 
 ### Comandos post-deployment sugeridos:
 ```bash
