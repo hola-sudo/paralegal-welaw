@@ -150,7 +150,7 @@ async function generateDocument(
         jsonrpc: "2.0",
         method: "tools/call",
         params: {
-          name: "google_drive_create_document",
+          name: "google_docs_create_document_from_template",
           arguments: {
             template_name: templateName,
             folder_id: DRIVE_FOLDER_ID,
