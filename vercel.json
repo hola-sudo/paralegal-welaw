@@ -2,10 +2,13 @@
   "version": 2,
   "functions": {
     "api/process.ts": {
-      "maxDuration": 30
+      "maxDuration": 45
     },
     "api/chat.ts": {
-      "maxDuration": 30
+      "maxDuration": 45
+    },
+    "api/download/[fileId].ts": {
+      "maxDuration": 10
     },
     "api/health.ts": {
       "maxDuration": 10

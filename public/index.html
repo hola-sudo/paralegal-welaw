@@ -170,7 +170,9 @@ FIRMANTES: Juan Pérez, María González`
                     mostrarResultado(`✅ ${data.resumen}
 
 📄 Tipo de documento: ${data.tipo_documento}
-🔗 Documento creado: ${data.documento_creado}
+📁 Archivo PDF: ${data.file_name}
+📊 Tamaño: ${Math.round(data.pdf_generation.file_size / 1024)} KB
+⏰ Válido por: ${data.pdf_generation.expires_in_minutes} minutos
 
 📋 Datos extraídos:
 ${JSON.stringify(data.datos_extraidos, null, 2)}
@@ -178,6 +180,9 @@ ${JSON.stringify(data.datos_extraidos, null, 2)}
 🛡️ Verificaciones de seguridad:
 - PII warnings: ${data.guardrails.pii_warnings.length || 'Ninguna'}
 - Moderación: ${data.guardrails.moderation_passed ? 'Aprobada' : 'Bloqueada'}`, 'success');
+                    
+                    // Agregar botón de descarga
+                    agregarBotonDescarga(data.download_url, data.file_name);
                 } else {
                     mostrarResultado(`❌ Error: ${data.error}
                     
@@ -195,6 +200,52 @@ ${data.warnings ? '⚠️ Advertencias:\n' + data.warnings.join('\n') : ''}`, 'e
             const resultado = document.getElementById('resultado');
             resultado.textContent = texto;
             resultado.className = `result ${tipo}`;
+        }
+        
+        function agregarBotonDescarga(downloadUrl, fileName) {
+            const resultado = document.getElementById('resultado');
+            
+            // Crear contenedor para botón
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.marginTop = '15px';
+            
+            // Crear botón de descarga
+            const downloadBtn = document.createElement('button');
+            downloadBtn.textContent = `⬇️ Descargar ${fileName}`;
+            downloadBtn.style.background = '#28a745';
+            downloadBtn.style.marginRight = '10px';
+            downloadBtn.style.width = 'auto';
+            downloadBtn.style.display = 'inline-block';
+            downloadBtn.onclick = () => {
+                window.open(downloadUrl, '_blank');
+            };
+            
+            // Crear botón para ver en nueva pestaña
+            const viewBtn = document.createElement('button');
+            viewBtn.textContent = '👁️ Ver PDF';
+            viewBtn.style.background = '#17a2b8';
+            viewBtn.style.width = 'auto';
+            viewBtn.style.display = 'inline-block';
+            viewBtn.onclick = () => {
+                // Abrir en nueva pestaña para visualizar
+                const newWindow = window.open(downloadUrl, '_blank');
+                if (newWindow) {
+                    newWindow.focus();
+                } else {
+                    alert('Por favor, permite ventanas emergentes para ver el PDF');
+                }
+            };
+            
+            buttonContainer.appendChild(downloadBtn);
+            buttonContainer.appendChild(viewBtn);
+            resultado.appendChild(buttonContainer);
+            
+            // Auto-descarga después de 2 segundos
+            setTimeout(() => {
+                if (confirm('¿Deseas descargar el PDF automáticamente?')) {
+                    downloadBtn.click();
+                }
+            }, 2000);
         }
     </script>
 </body>

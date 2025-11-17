@@ -1,7 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { processUserMessage, initializeConversation, ConversationState } from '../src/agent-real';
 import { DocumentType } from '../src/schemas-real';
-import { createDocumentFromTemplate } from '../src/google-drive';
+import { generatePDF } from '../src/pdf-generator';
+import { storePDF } from './download/[fileId]';
 
 // Simple in-memory storage para demo (en producción usar Redis/Database)
 const conversations = new Map<string, ConversationState>();
@@ -133,24 +134,26 @@ async function generateDocument(
       throw new Error('Estado incompleto para generar documento');
     }
 
-    // Preparar datos para Google Drive API directo
-    const templateName = getTemplateNameForGoogleDrive(state.documentType);
-    const replacements = flattenDataForGoogleDrive(state.extractedData);
+    // Generar PDF con los datos extraídos
+    console.log('🚀 Chat: Generando PDF...');
+    console.log('📄 Chat: Tipo de documento:', state.documentType);
+    console.log('📋 Chat: Datos:', Object.keys(state.extractedData).length, 'campos');
 
-    // Llamada a Google Drive API directo (Chat)
-    console.log('🚀 Chat: Creando documento con Google Drive API directo...');
-    console.log('📄 Chat: Plantilla:', templateName);
-    console.log('📋 Chat: Reemplazos:', Object.keys(replacements).length, 'campos');
+    const pdfResult = await generatePDF({
+      templateType: state.documentType,
+      extractedData: state.extractedData as any, // Conversión temporal para compatibilidad
+      documentName: `${state.documentType}_chat_${Date.now()}`,
+      includeMetadata: true
+    });
 
-    const googleDriveResult = await createDocumentFromTemplate(
-      templateName,
-      replacements,
-      "", // Sin folder_id para crear en raíz del service account
-      `${state.documentType}_chat_${new Date().toISOString().split('T')[0]}_${Date.now()}`
-    );
+    if (!pdfResult.success) {
+      throw new Error(`Error generando PDF: ${pdfResult.error}`);
+    }
 
-    if (!googleDriveResult.success) {
-      throw new Error(`Error de Google Drive: ${googleDriveResult.error}`);
+    // Almacenar PDF en el store temporal
+    const fileId = `chat_${state.documentType}_${Date.now()}`;
+    if (pdfResult.pdfBuffer && pdfResult.fileName) {
+      storePDF(fileId, pdfResult.pdfBuffer, pdfResult.fileName);
     }
 
     // Actualizar estado como completado
@@ -158,7 +161,7 @@ async function generateDocument(
       ...state,
       step: 'document_generated',
       isComplete: true,
-      documentUrl: googleDriveResult.documentUrl
+      documentUrl: `/api/download/${fileId}`
     };
 
     conversations.set(sessionId, updatedState);
@@ -167,16 +170,19 @@ async function generateDocument(
       sessionId,
       complete: true,
       success: true,
-      message: `🎉 ¡Documento ${state.documentType} generado exitosamente con Google Drive API!
+      message: `🎉 ¡PDF ${state.documentType} generado exitosamente!
 
 📄 **Tipo:** ${state.documentType}
-🔗 **Documento:** ${googleDriveResult.documentUrl || 'Creado en Google Drive'}
-🆔 **ID:** ${googleDriveResult.documentId}
+📋 **Campos extraídos:** ${Object.keys(state.extractedData).length}
+📁 **Archivo:** ${pdfResult.fileName}
 ⏰ **Generado:** ${new Date().toLocaleString('es-MX')}
+⌛ **Descarga válida:** 5 minutos
+
+[⬇️ DESCARGAR PDF](${`/api/download/${fileId}`})
 
 ¿Necesitas generar algún otro documento para este proyecto?`,
-      documentUrl: googleDriveResult.documentUrl,
-      documentId: googleDriveResult.documentId,
+      download_url: `/api/download/${fileId}`,
+      file_name: pdfResult.fileName,
       documentType: state.documentType,
       extractedData: state.extractedData
     });

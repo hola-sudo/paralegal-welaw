@@ -1,13 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { processTranscriptConversational } from '../src/agent-real';
 import { DocumentType } from '../src/schemas-real';
-import { createDocumentFromTemplate } from '../src/google-drive';
+import { generatePDF } from '../src/pdf-generator';
+import { storePDF } from './download/[fileId]';
 
-// Validar variables de entorno requeridas
+// Validar variables de entorno requeridas (solo OpenAI para PDFs)
 const requiredEnvVars = {
-  OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-  GOOGLE_SERVICE_ACCOUNT_KEY: process.env.GOOGLE_SERVICE_ACCOUNT_KEY,
-  DRIVE_FOLDER_ID: process.env.DRIVE_FOLDER_ID
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY
 };
 
 // Verificar que todas las variables estén definidas
@@ -18,8 +17,6 @@ const missingVars = Object.entries(requiredEnvVars)
 if (missingVars.length > 0) {
   console.error('Missing environment variables:', missingVars.join(', '));
 }
-
-const DRIVE_FOLDER_ID = process.env.DRIVE_FOLDER_ID as string;
 
 export default async function handler(
   req: VercelRequest,
@@ -79,50 +76,51 @@ export default async function handler(
       });
     }
 
-    // Preparamos los datos para Google Drive API directo
-    const templateName = getTemplateName(result.tipo_documento);
-    const replacements = flattenDataForGoogleDrive(result.datos);
+    // Generar PDF con los datos extraídos
+    console.log('🚀 Generando PDF con datos extraídos...');
+    console.log('📄 Tipo de documento:', result.tipo_documento);
+    console.log('📋 Datos:', Object.keys(result.datos).length, 'campos extraídos');
 
-    // Llamada a Google Drive API directo
-    console.log('🚀 Creando documento con Google Drive API directo...');
-    console.log('📄 Plantilla:', templateName);
-    console.log('📋 Reemplazos:', Object.keys(replacements).length, 'campos');
+    const pdfResult = await generatePDF({
+      templateType: result.tipo_documento,
+      extractedData: result.datos as any, // Conversión temporal para compatibilidad
+      documentName: `${result.tipo_documento}_${Date.now()}`,
+      includeMetadata: true
+    });
 
-    const googleDriveResult = await createDocumentFromTemplate(
-      templateName,
-      replacements,
-      "", // Sin folder_id para crear en raíz del service account
-      `${result.tipo_documento}_${new Date().toISOString().split('T')[0]}_${Date.now()}`
-    );
-
-    if (!googleDriveResult.success) {
+    if (!pdfResult.success) {
       return res.status(500).json({
-        error: `Error al crear documento en Google Drive: ${googleDriveResult.error}`,
+        error: `Error al generar PDF: ${pdfResult.error}`,
         details: {
-          template: templateName,
-          folder_id: DRIVE_FOLDER_ID,
-          replacements_count: Object.keys(replacements).length
+          tipo_documento: result.tipo_documento,
+          datos_extraidos: Object.keys(result.datos).length
         }
       });
+    }
+
+    // Almacenar PDF en el store temporal
+    const fileId = `${result.tipo_documento}_${Date.now()}`;
+    if (pdfResult.pdfBuffer && pdfResult.fileName) {
+      storePDF(fileId, pdfResult.pdfBuffer, pdfResult.fileName);
     }
 
     return res.status(200).json({
       success: true,
       tipo_documento: result.tipo_documento,
-      documento_creado: googleDriveResult.documentUrl || `https://drive.google.com/drive/folders/${DRIVE_FOLDER_ID}`,
-      documento_id: googleDriveResult.documentId,
+      download_url: `/api/download/${fileId}`,
+      file_name: pdfResult.fileName,
       datos_extraidos: result.datos,
       guardrails: {
         pii_warnings: result.guardrails.pii.warnings,
         moderation_passed: result.guardrails.moderation.passed
       },
       metadata: result.metadata,
-      google_drive: {
-        template_used: templateName,
-        folder_id: DRIVE_FOLDER_ID,
-        document_created: new Date().toISOString()
+      pdf_generation: {
+        generated_at: new Date().toISOString(),
+        file_size: pdfResult.pdfBuffer?.length || 0,
+        expires_in_minutes: 5
       },
-      resumen: `¡Documento ${result.tipo_documento} creado exitosamente con Google Drive API directo!`
+      resumen: `¡PDF ${result.tipo_documento} generado exitosamente! Descarga disponible por 5 minutos.`
     });
 
   } catch (error: any) {
