@@ -3,7 +3,7 @@
  * Reemplaza MCP con API nativa de Google
  */
 
-import { google, drive_v3 } from 'googleapis';
+import { google, drive_v3, docs_v1 } from 'googleapis';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
 
 interface ServiceAccountKey {
@@ -162,7 +162,7 @@ async function uploadModifiedDocument(
 }
 
 /**
- * Función principal: Crear documento desde plantilla con reemplazos
+ * Función principal: Crear documento directamente con reemplazos (sin plantillas)
  */
 export async function createDocumentFromTemplate(
   templateName: string,
@@ -176,39 +176,52 @@ export async function createDocumentFromTemplate(
   error?: string;
 }> {
   try {
-    console.log('🔍 Buscando plantilla:', templateName);
+    console.log('🚀 Creando documento directo (sin plantilla):', templateName);
+    console.log('📋 Reemplazos:', Object.keys(replacements).length, 'campos');
 
-    // 1. Buscar plantilla por nombre
-    const templateId = await findTemplateByName(templateName, folderId);
-    if (!templateId) {
-      return {
-        success: false,
-        error: `Plantilla "${templateName}" no encontrada en la carpeta especificada`,
-      };
-    }
-
-    console.log('✅ Plantilla encontrada, ID:', templateId);
-
-    // 2. Crear nombre del nuevo documento
+    // 1. Crear nombre del nuevo documento
     const docName = newDocumentName || `${templateName.replace(' - Plantilla', '')} - ${new Date().toISOString().split('T')[0]} - ${Date.now()}`;
 
-    // 3. Crear copia de la plantilla
-    const newDocumentId = await copyTemplate(templateId, docName, folderId);
-    console.log('✅ Copia creada, ID:', newDocumentId);
+    // 2. Crear documento vacío directamente
+    const drive = createDriveClient();
+    
+    const documentMetadata = {
+      name: docName,
+      mimeType: 'application/vnd.google-apps.document',
+      // Crear en la raíz del service account (sin parents para evitar problemas de permisos)
+    };
 
-    // 4. Descargar contenido
-    const documentContent = await downloadDocument(newDocumentId);
-    console.log('✅ Contenido descargado');
+    const createResponse = await drive.files.create({
+      requestBody: documentMetadata,
+      fields: 'id',
+    });
 
-    // 5. Reemplazar placeholders
-    const modifiedContent = replaceTextInDocument(documentContent, replacements);
-    console.log('✅ Placeholders reemplazados:', Object.keys(replacements).length);
+    const newDocumentId = createResponse.data.id!;
+    console.log('✅ Documento creado, ID:', newDocumentId);
 
-    // 6. Subir documento modificado
-    await uploadModifiedDocument(newDocumentId, modifiedContent);
-    console.log('✅ Documento modificado subido');
+    // 3. Crear contenido del documento con reemplazos
+    const documentContent = createDocumentContent(templateName, replacements);
+    
+    // 4. Usar Google Docs API para agregar contenido
+    const docs = google.docs({ version: 'v1', auth: drive.context._options.auth });
+    
+    await docs.documents.batchUpdate({
+      documentId: newDocumentId,
+      requestBody: {
+        requests: [
+          {
+            insertText: {
+              location: { index: 1 },
+              text: documentContent,
+            },
+          },
+        ],
+      },
+    });
 
-    // 7. Generar URL del documento
+    console.log('✅ Contenido agregado al documento');
+
+    // 5. Generar URL del documento
     const documentUrl = `https://docs.google.com/document/d/${newDocumentId}/edit`;
 
     return {
@@ -224,6 +237,103 @@ export async function createDocumentFromTemplate(
       error: error.message || 'Error desconocido al crear documento',
     };
   }
+}
+
+/**
+ * Crear contenido del documento con los datos reemplazados
+ */
+function createDocumentContent(templateName: string, replacements: Record<string, string>): string {
+  const documentTemplates = {
+    'Contrato Base 3D Pixel Perfection - Plantilla': `
+CONTRATO DE PRESTACIÓN DE SERVICIOS
+3D PIXEL PERFECTION
+
+DATOS DEL CLIENTE:
+- Nombre: ${replacements.NOMBRE_CLIENTE || '[NOMBRE_CLIENTE]'}
+- RFC: ${replacements.RFC_cliente || '[RFC_CLIENTE]'}
+
+DATOS DEL EVENTO:
+- Evento: ${replacements.NOMBRE_EVENTO || '[NOMBRE_EVENTO]'}
+- Tipo: ${replacements.EVENTO || '[TIPO_EVENTO]'}
+- Fecha del evento: ${replacements.FECHA_EVENTO || '[FECHA_EVENTO]'}
+- Hora: ${replacements['HH:MM'] || '[HORA]'}
+- Ubicación: ${replacements.UBICACION || '[UBICACION]'}
+
+DATOS DEL CONTRATO:
+- Fecha de firma: ${replacements['DD/MM/AAAA'] || '[FECHA_CONTRATO]'}
+
+SERVICIOS:
+3D Pixel Perfection se compromete a proporcionar servicios de renderizado 3D 
+y visualización para el evento especificado, incluyendo diseño, modelado y 
+presentación de espacios y decoraciones.
+
+---
+Documento generado automáticamente el ${new Date().toLocaleString('es-MX')}
+`,
+    
+    'ANEXO A - Plantilla': `
+ANEXO A - ESPECIFICACIONES TÉCNICAS DE MONTAJE
+3D PIXEL PERFECTION
+
+EVENTO: ${replacements.NOMBRE_EVENTO || '[NOMBRE_EVENTO]'}
+CLIENTE: ${replacements.NOMBRE_CLIENTE || '[NOMBRE_CLIENTE]'}
+FECHA: ${replacements.FECHA_EVENTO || '[FECHA_EVENTO]'}
+
+ESPECIFICACIONES DEL SALÓN:
+- Largo: ${replacements.MEDIDA_LARGO_SALON || '[LARGO]'} metros
+- Ancho: ${replacements.MEDIDA_ANCHO_SALON || '[ANCHO]'} metros  
+- Alto: ${replacements.MEDIDA_ALTO_SALON || '[ALTO]'} metros
+
+MOBILIARIO:
+- Formato de mesas: ${replacements.FORMATO_MESA || '[FORMATO_MESA]'}
+- Cantidad de sillas: ${replacements.CANTIDAD_SILLAS || '[CANTIDAD_SILLAS]'}
+- Tipo de sillas: ${replacements.TIPO_SILLA || '[TIPO_SILLA]'}
+
+DECORACIÓN:
+- Centro de mesa: ${replacements.DESCRIPCION_CENTRO_MESA || '[CENTRO_MESA]'}
+- Flores: ${replacements.FLORES_CENTRO_MESA || '[FLORES]'}
+- Elementos decorativos: ${replacements.DESCRIPCION_ELEMENTO_DECORATIVO || '[ELEMENTOS]'}
+
+---
+Documento generado automáticamente el ${new Date().toLocaleString('es-MX')}
+`,
+
+    'ANEXO B - Plantilla': `
+ANEXO B - RENDERS Y TEMAS VISUALES
+3D PIXEL PERFECTION
+
+CLIENTE: ${replacements.CLIENTE || '[CLIENTE]'}
+EVENTO: ${replacements.NOMBRE_EVENTO || '[NOMBRE_EVENTO]'}
+FECHA: ${replacements.FECHA_EVENTO || '[FECHA_EVENTO]'}
+
+TEMAS SOLICITADOS:
+- Tema 1: ${replacements.TEMA_1 || '[TEMA_1]'}
+- Tema 2: ${replacements.TEMA_2 || '[TEMA_2]'}
+
+ESTADO DE RENDERS:
+- Confirmado Tema 1: ${replacements.CONFIRMADO_1 || '[PENDIENTE]'}
+- Confirmado Tema 2: ${replacements.CONFIRMADO_2 || '[PENDIENTE]'}
+- En render Tema 1: ${replacements.EN_RENDERS_1 || '[PENDIENTE]'}
+- En render Tema 2: ${replacements.EN_RENDERS_2 || '[PENDIENTE]'}
+
+REPRESENTANTE: ${replacements.PIXEL_REPRESENTANTE || '[REPRESENTANTE]'}
+
+---
+Documento generado automáticamente el ${new Date().toLocaleString('es-MX')}
+`
+  };
+
+  return documentTemplates[templateName as keyof typeof documentTemplates] || `
+DOCUMENTO: ${templateName}
+
+DATOS PROPORCIONADOS:
+${Object.entries(replacements)
+  .map(([key, value]) => `- ${key}: ${value || '[NO PROPORCIONADO]'}`)
+  .join('\n')}
+
+---
+Documento generado automáticamente el ${new Date().toLocaleString('es-MX')}
+  `;
 }
 
 /**
