@@ -15,7 +15,7 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/public/agentkit-demo.html"
+      "destination": "/agentkit-demo.html"
     }
   ],
   "headers": [
