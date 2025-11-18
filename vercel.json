@@ -11,10 +11,6 @@
       "maxDuration": 30,
       "memory": 512
     },
-    "api/download/[fileId].ts": {
-      "maxDuration": 10,
-      "memory": 256
-    },
     "api/health.ts": {
       "maxDuration": 10,
       "memory": 256

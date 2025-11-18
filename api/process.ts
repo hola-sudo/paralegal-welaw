@@ -2,7 +2,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { processTranscriptConversational } from '../src/agent-real';
 import { DocumentType } from '../src/schemas-real';
 import { generatePDF } from '../src/pdf-generator';
-import { storePDF } from './download/[fileId]';
 
 // Validar variables de entorno requeridas (solo OpenAI para PDFs nativos)
 // VERSIÓN: 2.0 - Con pdfmake profesional (NO Puppeteer)
@@ -99,17 +98,14 @@ export default async function handler(
       });
     }
 
-    // SOLUCIÓN TEMPORAL: Retornar PDF directamente como base64 
-    // En lugar de usar storage temporal que falla en Vercel
-    const fileId = `${result.tipo_documento}_${Date.now()}`;
+    // SOLUCIÓN PROFESIONAL: PDF directo como base64 (arquitectura correcta para Vercel Serverless)
     const pdfBase64 = pdfResult.pdfBuffer?.toString('base64') || '';
 
     return res.status(200).json({
       success: true,
       tipo_documento: result.tipo_documento,
-      download_url: `/api/download/${fileId}`,
       file_name: pdfResult.fileName,
-      // NUEVA: PDF directo para descarga inmediata
+      // PDF directo para descarga inmediata
       pdf_direct: {
         base64: pdfBase64,
         size: pdfResult.pdfBuffer?.length || 0,

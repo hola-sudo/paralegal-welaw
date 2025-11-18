@@ -15,11 +15,12 @@ const requiredFiles = [
   'package.json',
   'api/process.ts',
   'api/health.ts',
-  'public/index.html',
-  'src/agent.ts',
-  'src/schemas.ts',
-  'src/classification.ts',
-  'src/guardrails.ts'
+  'public/demo.html',
+  'src/agent-real.ts',
+  'src/schemas-real.ts',
+  'src/classification-real.ts',
+  'src/guardrails.ts',
+  'src/pdf-generator.ts'
 ];
 
 let allFilesPresent = true;
