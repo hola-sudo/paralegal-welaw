@@ -25,7 +25,10 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.68",
     "@openai/agents": "^0.3.2",
+    "agentkit": "^0.0.0",
+    "ai": "^5.0.93",
     "docx": "^8.5.0",
     "openai": "^6.9.0",
     "pdfmake": "^0.2.9",
@@ -34,7 +37,7 @@
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@types/pdfmake": "^0.2.12",
-    "@vercel/node": "^4.0.0",
+    "@vercel/node": "^2.3.0",
     "node-fetch": "^3.3.2",
     "ts-node": "^10.9.0",
     "typescript": "^5.0.0"

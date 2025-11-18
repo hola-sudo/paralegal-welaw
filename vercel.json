@@ -11,6 +11,10 @@
       "maxDuration": 30,
       "memory": 512
     },
+    "api/agentkit-chat.ts": {
+      "maxDuration": 45,
+      "memory": 1024
+    },
     "api/health.ts": {
       "maxDuration": 10,
       "memory": 256
@@ -19,7 +23,11 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/public/demo.html"
+      "destination": "/public/agentkit-demo.html"
+    },
+    {
+      "source": "/agentkit",
+      "destination": "/public/agentkit-demo.html"
     },
     {
       "source": "/demo",
