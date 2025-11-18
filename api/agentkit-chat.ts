@@ -120,26 +120,17 @@ export async function getConversationStatus(
   }
 
   try {
-    // Funcionalidad simplificada - estado básico
-    const state = { sessionId: conversationId, step: 'active' };
-    
-    if (!state) {
-      return res.status(404).json({ error: 'Conversation not found' });
-    }
-
     return res.status(200).json({
       conversationId,
-      step: state.conversationStep,
-      documentType: state.documentType,
+      step: 'active',
+      documentType: null,
       progress: {
-        extractedFields: Object.keys(state.extractedData).length,
-        missingFields: state.missingFields.length,
-        completionRate: Math.round(
-          ((Object.keys(state.extractedData).length - state.missingFields.length) / 
-           Object.keys(state.extractedData).length) * 100
-        )
+        extractedFields: 0,
+        missingFields: 0,
+        completionRate: 0
       },
-      pdfGenerated: state.pdfGenerated
+      pdfGenerated: false,
+      message: 'Estado simplificado - usa el endpoint principal para conversaciones'
     });
 
   } catch (error: any) {
