@@ -99,17 +99,22 @@ export default async function handler(
       });
     }
 
-    // Almacenar PDF en el store temporal
+    // SOLUCIÓN TEMPORAL: Retornar PDF directamente como base64 
+    // En lugar de usar storage temporal que falla en Vercel
     const fileId = `${result.tipo_documento}_${Date.now()}`;
-    if (pdfResult.pdfBuffer && pdfResult.fileName) {
-      storePDF(fileId, pdfResult.pdfBuffer, pdfResult.fileName);
-    }
+    const pdfBase64 = pdfResult.pdfBuffer?.toString('base64') || '';
 
     return res.status(200).json({
       success: true,
       tipo_documento: result.tipo_documento,
       download_url: `/api/download/${fileId}`,
       file_name: pdfResult.fileName,
+      // NUEVA: PDF directo para descarga inmediata
+      pdf_direct: {
+        base64: pdfBase64,
+        size: pdfResult.pdfBuffer?.length || 0,
+        ready_for_download: true
+      },
       datos_extraidos: result.datos,
       guardrails: {
         pii_warnings: result.guardrails.pii.warnings,
