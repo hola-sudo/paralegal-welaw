@@ -37,8 +37,8 @@ export default async function handler(
     configuration: {
       all_env_vars_configured: allConfigured,
       details: envVars,
-      pdf_generator_ready: pdfGeneratorReady,
-      architecture: "Native PDF generation (pdfmake)"
+      architecture: "Native PDF generation (pdfmake)",
+      pdf_generator: "Direct generation - no external storage"
     },
     endpoints: {
       health: {
@@ -63,13 +63,17 @@ export default async function handler(
     integrations: {
       openai: {
         configured: !!process.env.OPENAI_API_KEY,
-        models_used: ['gpt-4o']
+        models_used: ['gpt-4o'],
+        purpose: 'AI agent for data extraction and document classification'
       },
       pdf_generator: {
         engine: 'pdfmake',
+        version: '0.2.9',
         type: 'native_serverless',
-        features: ['professional_templates', 'fast_generation', 'zero_dependencies'],
-        performance: 'Sub-2-second generation'
+        features: ['professional_templates', 'direct_download', 'base64_output'],
+        performance: 'Sub-3-second generation',
+        templates: 5,
+        total_fields: 135
       }
     }
   });

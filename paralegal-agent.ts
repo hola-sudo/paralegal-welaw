@@ -1,34 +1,52 @@
 /**
- * Agente Paralegal - Punto de entrada principal
+ * Agente Paralegal V2.0 - 3D PIXEL PERFECTION
  * 
- * Este archivo exporta las funciones principales del agente para uso directo
- * o para importar en otros módulos.
+ * Punto de entrada principal para el agente especializado en decoración de eventos.
+ * Sistema completamente actualizado con pdfmake nativo y templates exactos.
  * 
- * Para usar como API en Vercel, ve a /api/process.ts
- * Para usar directamente en código, importa las funciones desde aquí.
+ * Para usar como API en Vercel: /api/process.ts
+ * Para uso directo en código: importa las funciones desde aquí.
  */
 
-// Exportamos las funciones principales del agente
-export { processTranscript, processTranscriptSimple } from './src/agent';
-export type { ProcessingResult } from './src/agent';
+// Exportamos las funciones principales del agente (V2.0)
+export { processTranscriptConversational } from './src/agent-real';
+export type { ConversationState, ConversationResult } from './src/agent-real';
 
-// Exportamos los tipos y schemas
-export { DocumentTypeSchema, DocumentSchemas } from './src/schemas';
-export type { DocumentType, ExtractedData } from './src/schemas';
+// Exportamos los tipos y schemas actualizados
+export { DocumentTypeSchema, DocumentSchemasReal } from './src/schemas-real';
+export type { DocumentType, ExtractedDataReal } from './src/schemas-real';
 
-// Exportamos las funciones de guardrails (por si las necesitas usar directamente)
+// Exportamos las funciones de guardrails (sin cambios)
 export { checkPII, checkModeration, runGuardrails } from './src/guardrails';
 export type { GuardrailResult } from './src/guardrails';
 
-// Exportamos las funciones de clasificación (por si las necesitas usar directamente)
-export { classifyDocument, extractPlaceholders } from './src/classification';
+// Exportamos las funciones de clasificación actualizadas
+export { classifyDocumentReal, extractPlaceholdersReal } from './src/classification-real';
+
+// Exportamos el generador de PDFs
+export { generatePDF } from './src/pdf-generator';
+export type { PDFGeneratorOptions, PDFGenerationResult } from './src/pdf-generator';
 
 /**
- * Ejemplo de uso directo (no necesario si usas la API):
+ * Ejemplo de uso V2.0:
  * 
- * import { processTranscript } from './paralegal-agent';
+ * import { processTranscriptConversational, generatePDF } from './paralegal-agent';
  * 
- * const transcript = "Texto de la transcripción aquí...";
- * const result = await processTranscript(transcript);
- * console.log(result);
+ * // Procesar transcripción de evento
+ * const transcript = "Hola, soy María González, quiero decoración para mi boda...";
+ * const result = await processTranscriptConversational(transcript);
+ * 
+ * if (!result.needsFollowUp) {
+ *   // Generar PDF directamente
+ *   const pdfResult = await generatePDF({
+ *     templateType: result.tipo_documento,
+ *     extractedData: result.datos,
+ *     documentName: `${result.tipo_documento}_${Date.now()}`,
+ *     includeMetadata: true
+ *   });
+ *   
+ *   console.log('PDF generado:', pdfResult.fileName);
+ * } else {
+ *   console.log('Preguntas de seguimiento:', result.followUpQuestions);
+ * }
  */
