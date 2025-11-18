@@ -4,7 +4,8 @@ import { DocumentType } from '../src/schemas-real';
 import { generatePDF } from '../src/pdf-generator';
 import { storePDF } from './download/[fileId]';
 
-// Validar variables de entorno requeridas (solo OpenAI para PDFs)
+// Validar variables de entorno requeridas (solo OpenAI para PDFs nativos)
+// VERSIÓN: 2.0 - Con pdfmake profesional (NO Puppeteer)
 const requiredEnvVars = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY
 };
