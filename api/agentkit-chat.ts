@@ -6,7 +6,9 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { processConversationalMessage } from '../src/simple-agent/conversational-agent';
+import { classifyDocumentReal, extractPlaceholdersReal, findMissingCriticalFields, generateFollowUpQuestions } from '../src/classification-real';
+import { generatePDF } from '../src/pdf-generator';
+import { runGuardrails } from '../src/guardrails';
 
 // Validar variables de entorno
 const requiredEnvVars = {
@@ -56,10 +58,59 @@ export default async function handler(
       });
     }
 
-    // Procesar el mensaje con agente conversacional simple
+    // Procesar el mensaje con agente conversacional simple  
     console.log('🤖 Procesando mensaje:', { message, conversationId });
     
-    const response = await processConversationalMessage(message, conversationId);
+    // Procesamiento simple directo
+    const guardrails = await runGuardrails(message);
+    if (guardrails.overall.blocked) {
+      return res.status(400).json({
+        success: false,
+        error: "Contenido bloqueado por medidas de seguridad",
+        warnings: guardrails.overall.warnings
+      });
+    }
+
+    const documentType = await classifyDocumentReal(message);
+    const extractedData = await extractPlaceholdersReal(message, documentType);
+    const missingFields = findMissingCriticalFields(extractedData, documentType);
+    
+    let pdfData = null;
+    let pdfGenerated = false;
+    
+    if (missingFields.length === 0) {
+      const pdfResult = await generatePDF({
+        templateType: documentType,
+        extractedData,
+        documentName: `${documentType}_${Date.now()}`,
+        includeMetadata: true
+      });
+      
+      if (pdfResult.success && pdfResult.pdfBuffer) {
+        pdfData = {
+          base64: pdfResult.pdfBuffer.toString('base64'),
+          fileName: pdfResult.fileName || `${documentType}.pdf`,
+          size: pdfResult.pdfBuffer.length
+        };
+        pdfGenerated = true;
+      }
+    }
+    
+    const response = {
+      response: pdfGenerated 
+        ? `¡PDF ${documentType.toUpperCase()} generado exitosamente! Descarga disponible.`
+        : `He identificado que necesitas un ${documentType.toUpperCase()}. ${missingFields.length > 0 ? `Faltan ${missingFields.length} campos críticos.` : 'Procesando...'}`,
+      conversationId: conversationId || `conv_${Date.now()}`,
+      documentType,
+      progress: {
+        step: pdfGenerated ? 'Documento generado exitosamente' : 'Recopilando información',
+        completionRate: Math.round(((Object.keys(extractedData).length - missingFields.length) / Object.keys(extractedData).length) * 100),
+        missingFields: missingFields.length
+      },
+      pdfGenerated,
+      pdfData,
+      needsInput: missingFields.length > 0
+    };
     
     console.log('✅ Respuesta generada:', {
       conversationId: response.conversationId,
