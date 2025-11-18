@@ -2,9 +2,10 @@ node_modules
 .env
 .env.local
 .env.*.local
-dist
 *.log
 .DS_Store
-example.ts
-ARQUITECTURA.md
-README.md
+BUILD_INFO.json
+DEPLOYMENT_STATUS.md
+FORCE_REBUILD.txt
+vercel-force-deploy.js
+tmp_*
