@@ -3,14 +3,6 @@
   "buildCommand": "npm run build",
   "cleanUrls": true,
   "functions": {
-    "api/process.ts": {
-      "maxDuration": 30,
-      "memory": 512
-    },
-    "api/chat.ts": {
-      "maxDuration": 30,
-      "memory": 512
-    },
     "api/agentkit-chat.ts": {
       "maxDuration": 45,
       "memory": 1024
