@@ -174,7 +174,7 @@ async function generateDocument(
 ⏰ **Generado:** ${new Date().toLocaleString('es-MX')}
 ⌛ **Descarga válida:** 5 minutos
 
-[⬇️ DESCARGAR PDF](${`/api/download/${fileId}`})
+📄 **PDF listo para descarga directa** (${Math.round((pdfResult.pdfBuffer?.length || 0) / 1024)}KB)
 
 ¿Necesitas generar algún otro documento para este proyecto?`,
       pdf_direct: { base64: pdfBase64, size: pdfResult.pdfBuffer?.length || 0 },
