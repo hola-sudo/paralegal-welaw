@@ -157,7 +157,7 @@ async function generateDocument(
       ...state,
       step: 'document_generated',
       isComplete: true,
-      documentUrl: `/api/download/${fileId}`
+      documentUrl: null
     };
 
     conversations.set(sessionId, updatedState);
