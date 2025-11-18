@@ -149,11 +149,8 @@ async function generateDocument(
       throw new Error(`Error generando PDF: ${pdfResult.error}`);
     }
 
-    // Almacenar PDF en el store temporal
-    const fileId = `chat_${state.documentType}_${Date.now()}`;
-    if (pdfResult.pdfBuffer && pdfResult.fileName) {
-      storePDF(fileId, pdfResult.pdfBuffer, pdfResult.fileName);
-    }
+    // PDF listo directamente como base64
+    const pdfBase64 = pdfResult.pdfBuffer?.toString('base64') || '';
 
     // Actualizar estado como completado
     const updatedState: ConversationState = {
@@ -180,7 +177,7 @@ async function generateDocument(
 [⬇️ DESCARGAR PDF](${`/api/download/${fileId}`})
 
 ¿Necesitas generar algún otro documento para este proyecto?`,
-      download_url: `/api/download/${fileId}`,
+      pdf_direct: { base64: pdfBase64, size: pdfResult.pdfBuffer?.length || 0 },
       file_name: pdfResult.fileName,
       documentType: state.documentType,
       extractedData: state.extractedData
