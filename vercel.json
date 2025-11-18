@@ -23,11 +23,11 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/public/agentkit-demo.html"
+      "destination": "/agentkit-demo.html"
     },
     {
       "source": "/agentkit",
-      "destination": "/public/agentkit-demo.html"
+      "destination": "/agentkit-demo.html"
     },
     {
       "source": "/demo",
