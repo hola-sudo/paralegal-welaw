@@ -2,7 +2,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { processUserMessage, initializeConversation, ConversationState } from '../src/agent-real';
 import { DocumentType } from '../src/schemas-real';
 import { generatePDF } from '../src/pdf-generator';
-import { storePDF } from './download/[fileId]';
 
 // Simple in-memory storage para demo (en producción usar Redis/Database)
 const conversations = new Map<string, ConversationState>();
