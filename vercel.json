@@ -23,19 +23,7 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/agentkit-demo.html"
-    },
-    {
-      "source": "/agentkit",
-      "destination": "/agentkit-demo.html"
-    },
-    {
-      "source": "/demo",
-      "destination": "/public/demo.html"
-    },
-    {
-      "source": "/old",
-      "destination": "/public/index.html"
+      "destination": "/public/agentkit-demo.html"
     }
   ],
   "headers": [
