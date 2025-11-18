@@ -425,13 +425,22 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showDirectResult(`✅ ${data.resumen}
+                    const successText = `✅ ${data.resumen}
 
 📄 Tipo: ${data.tipo_documento}
-🔗 Documento: ${data.documento_creado}
+🔗 Documento: ${data.file_name || 'contrato-generado.pdf'}
 
 📋 Datos extraídos:
-${JSON.stringify(data.datos_extraidos, null, 2)}`, 'success');
+${JSON.stringify(data.datos_extraidos, null, 2)}`;
+
+                    // Si hay PDF disponible, pasar datos para botones
+                    const pdfData = data.pdf_direct ? {
+                        base64: data.pdf_direct.base64,
+                        fileName: data.file_name || 'contrato-generado.pdf',
+                        size: data.pdf_direct.size
+                    } : null;
+
+                    showDirectResult(successText, 'success', pdfData);
                 } else if (data.needsFollowUp) {
                     showDirectResult(`ℹ️ Información parcial extraída
 
@@ -471,9 +480,84 @@ ${data.mensaje}`, 'partial');
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        function showDirectResult(text, type) {
+        function downloadPDF(base64Data, fileName) {
+            try {
+                // Convertir base64 a bytes
+                const byteCharacters = atob(base64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                
+                // Crear blob PDF
+                const blob = new Blob([byteArray], { type: 'application/pdf' });
+                
+                // Crear enlace temporal
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName || 'contrato-generado.pdf';
+                document.body.appendChild(a);
+                a.click();
+                
+                // Limpiar
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                alert('Error al descargar PDF: ' + error.message);
+            }
+        }
+
+        function viewPDF(base64Data, fileName) {
+            try {
+                // Convertir base64 a bytes
+                const byteCharacters = atob(base64Data);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                
+                // Crear blob PDF
+                const blob = new Blob([byteArray], { type: 'application/pdf' });
+                
+                // Abrir en nueva pestaña
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+                
+                // Limpiar después de un tiempo
+                setTimeout(() => URL.revokeObjectURL(url), 60000);
+            } catch (error) {
+                alert('Error al visualizar PDF: ' + error.message);
+            }
+        }
+
+        function showDirectResult(text, type, pdfData = null) {
             const resultDiv = document.getElementById('directResult');
-            resultDiv.textContent = text;
+            
+            if (pdfData && pdfData.base64 && pdfData.fileName) {
+                // Crear contenido con botones de descarga
+                resultDiv.innerHTML = `
+                    <div class="success-message">${text}</div>
+                    <div class="pdf-actions" style="margin-top: 20px; text-align: center;">
+                        <button onclick="downloadPDF('${pdfData.base64}', '${pdfData.fileName}')" 
+                                style="background: #28a745; color: white; padding: 12px 24px; border: none; border-radius: 6px; margin: 0 10px; cursor: pointer; font-size: 16px; font-weight: bold;">
+                            📥 Descargar PDF
+                        </button>
+                        <button onclick="viewPDF('${pdfData.base64}', '${pdfData.fileName}')" 
+                                style="background: #007bff; color: white; padding: 12px 24px; border: none; border-radius: 6px; margin: 0 10px; cursor: pointer; font-size: 16px;">
+                            👁️ Ver PDF
+                        </button>
+                        <div style="margin-top: 10px; font-size: 14px; color: #666;">
+                            📊 Tamaño: ${Math.round(pdfData.size / 1024)} KB
+                        </div>
+                    </div>
+                `;
+            } else {
+                resultDiv.textContent = text;
+            }
+            
             resultDiv.className = `result ${type}`;
         }
 
