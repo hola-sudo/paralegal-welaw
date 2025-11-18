@@ -1,0 +1,11 @@
+FORCE REBUILD - 2025-11-18T00:05:25.703Z
+
+CAMBIO CRÍTICO: Migración completa de Puppeteer a pdfmake
+
+ELIMINAR ESTE ARCHIVO después del deployment exitoso.
+
+Este archivo existe únicamente para forzar a Vercel a detectar
+que hay cambios reales en el proyecto y ejecutar un rebuild completo.
+
+VERSIÓN: 2.0.0-pdfmake
+TIMESTAMP: 2025-11-18T00:05:25.703Z
