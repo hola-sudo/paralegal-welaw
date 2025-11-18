@@ -6,7 +6,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { processMessage, ChatMessage } from '../src/agentkit/chat-interface';
+import { processConversationalMessage } from '../src/simple-agent/conversational-agent';
 
 // Validar variables de entorno
 const requiredEnvVars = {
@@ -56,10 +56,10 @@ export default async function handler(
       });
     }
 
-    // Procesar el mensaje con AgentKit
-    console.log('🤖 Procesando mensaje con AgentKit:', { message, conversationId });
+    // Procesar el mensaje con agente conversacional simple
+    console.log('🤖 Procesando mensaje:', { message, conversationId });
     
-    const response = await processMessage(message, conversationId);
+    const response = await processConversationalMessage(message, conversationId);
     
     console.log('✅ Respuesta generada:', {
       conversationId: response.conversationId,
@@ -81,7 +81,7 @@ export default async function handler(
       needsInput: response.needsInput,
       metadata: {
         timestamp: new Date().toISOString(),
-        agentVersion: 'AgentKit-v1.0',
+        agentVersion: 'SimpleAgent-v1.0',
         processingTime: 'Sub-5-seconds'
       }
     });
