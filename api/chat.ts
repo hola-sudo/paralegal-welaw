@@ -157,7 +157,7 @@ async function generateDocument(
       ...state,
       step: 'document_generated',
       isComplete: true,
-      documentUrl: null
+      documentUrl: undefined
     };
 
     conversations.set(sessionId, updatedState);
