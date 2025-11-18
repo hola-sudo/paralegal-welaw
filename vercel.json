@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "buildCommand": "npm run build",
   "functions": {
     "api/process.ts": {
       "maxDuration": 30,
