@@ -15,7 +15,7 @@
 
 ### **🎯 FUNCIONALIDAD ACTUAL:**
 - **Agente AI:** Procesamiento conversacional de transcripciones
-- **Documentos:** 5 tipos exactos del negocio real (135 campos únicos)
+- **Documentos:** 5 tipos exactos del negocio real (125 campos únicos)
 - **PDF Generation:** pdfmake nativo (NO Puppeteer/Google Drive)
 - **Performance:** Sub-3 segundos por documento
 
@@ -84,12 +84,12 @@ api/
 src/
 ├── agent-real.ts          ✅ Agente conversacional principal
 ├── classification-real.ts ✅ Clasificación específica de eventos
-├── schemas-real.ts        ✅ 135 campos exactos de .docx
+├── schemas-real.ts        ✅ 125 campos exactos de .docx
 ├── pdf-generator.ts       ✅ Templates pdfmake profesionales
 └── guardrails.ts          ✅ Seguridad (sin cambios)
 ```
 
-### **TEMPLATES PDF (135 campos únicos):**
+### **TEMPLATES PDF (125 campos únicos):**
 1. **Contrato Base** (8 campos) - Datos básicos del evento
 2. **Anexo A** (61 campos) - Especificaciones técnicas de montaje
 3. **Anexo B** (13 campos) - Renders y temas visuales

@@ -28,7 +28,7 @@ El proyecto **Agente Paralegal AI para 3D Pixel Perfection** ha sido completado 
 - ✅ **Arquitectura Nativa**: pdfmake (sin dependencias externas)
 - ✅ **Performance**: Generación sub-3-segundos
 - ✅ **Templates**: 5 contratos profesionales
-- ✅ **Campos**: 135 campos automáticos extraíbles
+- ✅ **Campos**: 125 campos automáticos extraíbles
 - ✅ **Formatos**: PDF directo + Base64
 
 ### 🔌 API REST Completa

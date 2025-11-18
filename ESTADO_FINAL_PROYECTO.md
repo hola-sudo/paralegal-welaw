@@ -4,12 +4,13 @@
 
 ### **Migración Completada:**
 - ❌ **ANTES:** Google Drive API (problemas de permisos, complejidad de setup)
-- ✅ **DESPUÉS:** PDF Generator nativo con Puppeteer + Templates HTML
+- ❌ **INTERMEDIO:** Puppeteer + Chromium (problemas de bundle size y timeouts)
+- ✅ **ACTUAL:** PDF Generator nativo con pdfmake + Templates profesionales
 
-### **Configuración Final de Puppeteer para Vercel:**
-- ✅ **`@sparticuz/chromium`**: v119.0.2 (compatible con Vercel)
-- ✅ **`puppeteer-core`**: v21.0.0 (optimizado para serverless)
-- ✅ **Configuración serverless**: Args, executablePath, y viewport configurados
+### **Configuración Final de PDFMake para Vercel:**
+- ✅ **`pdfmake`**: v0.2.9 (nativo, sin dependencias externas)
+- ✅ **Sin Chromium**: Bundle ultra-liviano < 2MB
+- ✅ **Templates internos**: 5 documentos profesionales integrados
 
 ### **Estado de Deployments:**
 - ✅ **Producción activa:** `https://paralegal-welaw-h1ol7fcgk-we-law.vercel.app`
@@ -41,8 +42,8 @@ Transcripción → Agent AI → Extracción → PDF Generator → Download Link
 
 ### **Stack Tecnológico:**
 - **Runtime:** Node.js 18+ en Vercel Serverless
-- **AI:** OpenAI GPT-4 con function calling
-- **PDF:** Puppeteer + @sparticuz/chromium 
+- **AI:** OpenAI GPT-4o con function calling
+- **PDF:** pdfmake nativo (sin dependencias externas)
 - **Validation:** Zod schemas + guardrails
 - **Deployment:** Vercel con GitHub integration
 

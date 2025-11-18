@@ -6,7 +6,7 @@
  * - anexo_a.docx: 58 campos (especificaciones de montaje)
  * - anexo_b.docx: 12 campos (renders y temas)
  * - anexo_c.docx: 24 campos (control de cambios)
- * - anexo_d.docx: 21 campos (entrega final)
+ * - anexo_d.docx: 23 campos (entrega final)
  */
 
 import { z } from 'zod';

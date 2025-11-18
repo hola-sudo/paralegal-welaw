@@ -318,7 +318,9 @@ export function generateFollowUpQuestions(
     'FECHA_ENTREGA': '¿Para cuándo necesitan la entrega final?',
     'CANTIDAD_RENDERS_ENTREGADOS': '¿Cuántos renders se van a entregar?',
     'PAQUETE': '¿Qué paquete contrataron?',
-    'TOTAL': '¿Cuál es el costo total del proyecto?'
+    'TOTAL': '¿Cuál es el costo total del proyecto?',
+    'COSTO': '¿Cuál es el costo del servicio?',
+    'AUTORIZA_PAGO': '¿El cliente autoriza el pago final?'
   };
   
   return missingFields

@@ -73,7 +73,7 @@ export default async function handler(
         features: ['professional_templates', 'direct_download', 'base64_output'],
         performance: 'Sub-3-second generation',
         templates: 5,
-        total_fields: 135
+        total_fields: 125
       }
     }
   });

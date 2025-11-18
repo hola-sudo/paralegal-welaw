@@ -74,7 +74,7 @@ curl -X POST https://TU-NUEVO-URL.vercel.app/api/process \
 - 🎯 **Version:** 2.0.0-pdfmake
 - ⚡ **Performance:** 2-3 segundos por PDF
 - 🔒 **Sin errores:** No más Chromium/Puppeteer
-- 📋 **Documentos exactos:** 135 campos reales
+- 📋 **Documentos exactos:** 125 campos reales
 
 ---
 
