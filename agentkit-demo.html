@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Pixel Perfection - Asistente Paralegal AgentKit</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.2);
+            height: 6px;
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: rgba(255,255,255,0.8);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 15px;
+            border-radius: 15px;
+            line-height: 1.4;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.system {
+            align-self: center;
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            font-size: 0.9em;
+            max-width: 95%;
+            text-align: center;
+            border-radius: 20px;
+        }
+
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid #e9ecef;
+            background: #f8f9fa;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        #messageInput:focus {
+            border-color: #667eea;
+        }
+
+        #sendButton {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            min-width: 80px;
+            height: 50px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #sendButton:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        #sendButton:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .document-type {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .step-indicator {
+            background: #fff3e0;
+            color: #ef6c00;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .pdf-ready {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .download-button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 5px;
+            transition: background 0.3s ease;
+        }
+
+        .download-button:hover {
+            background: #45a049;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 15px;
+            max-width: 80px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .error-message {
+            background: #ffebee;
+            border: 1px solid #f44336;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                height: 90vh;
+            }
+            
+            .header h1 {
+                font-size: 1.4em;
+            }
+            
+            .message {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 3D Pixel Perfection</h1>
+            <p>Asistente Paralegal Inteligente con AgentKit</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="chat-area">
+            <div class="messages" id="messages">
+                <div class="message system">
+                    ¡Hola! Soy tu asistente paralegal especializado en eventos y renders 3D. 
+                    Puedo ayudarte a generar contratos base, anexos de especificaciones técnicas, 
+                    documentos de renders, control de cambios y autorizaciones de entrega.
+                    <br><br>
+                    <strong>¿Qué documento necesitas crear hoy?</strong>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="status">
+                <div>
+                    <span class="document-type" id="documentType">Identificando...</span>
+                    <span class="step-indicator" id="stepIndicator">Esperando información</span>
+                </div>
+                <div id="completionRate">0% completado</div>
+            </div>
+            <div class="input-container">
+                <textarea 
+                    id="messageInput" 
+                    placeholder="Describe tu evento o qué documento necesitas..."
+                    rows="1"
+                ></textarea>
+                <button id="sendButton">Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AgentKitChat {
+            constructor() {
+                this.conversationId = null;
+                this.isProcessing = false;
+                this.setupEventListeners();
+                this.adjustTextareaHeight();
+            }
+
+            setupEventListeners() {
+                const input = document.getElementById('messageInput');
+                const button = document.getElementById('sendButton');
+
+                button.addEventListener('click', () => this.sendMessage());
+                
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+
+                input.addEventListener('input', () => this.adjustTextareaHeight());
+            }
+
+            adjustTextareaHeight() {
+                const textarea = document.getElementById('messageInput');
+                textarea.style.height = 'auto';
+                textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+            }
+
+            async sendMessage() {
+                if (this.isProcessing) return;
+
+                const input = document.getElementById('messageInput');
+                const message = input.value.trim();
+
+                if (!message) return;
+
+                this.addMessage(message, 'user');
+                input.value = '';
+                this.adjustTextareaHeight();
+                this.setProcessing(true);
+
+                try {
+                    const response = await fetch('/api/agentkit-chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            conversationId: this.conversationId
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.conversationId = data.conversationId;
+                        this.addMessage(data.response, 'assistant');
+                        this.updateProgress(data.progress, data.documentType);
+                        
+                        if (data.pdfGenerated && data.pdfData) {
+                            this.showPDFReady(data.pdfData);
+                        }
+                    } else {
+                        this.addMessage(`Error: ${data.error}`, 'system');
+                        if (data.suggestions) {
+                            this.addMessage(`Sugerencias:\n${data.suggestions.join('\n')}`, 'system');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    this.addMessage('Error de conexión. Por favor, intenta nuevamente.', 'system');
+                } finally {
+                    this.setProcessing(false);
+                }
+            }
+
+            addMessage(content, type) {
+                const messages = document.getElementById('messages');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+                messageDiv.innerHTML = content.replace(/\n/g, '<br>');
+                messages.appendChild(messageDiv);
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            updateProgress(progress, documentType) {
+                if (progress) {
+                    document.getElementById('stepIndicator').textContent = progress.step || 'Procesando';
+                    document.getElementById('completionRate').textContent = 
+                        `${progress.completionRate || 0}% completado`;
+                    
+                    const progressFill = document.getElementById('progressFill');
+                    progressFill.style.width = `${progress.completionRate || 0}%`;
+                }
+
+                if (documentType) {
+                    const typeDisplay = documentType.replace('_', ' ').toUpperCase();
+                    document.getElementById('documentType').textContent = typeDisplay;
+                }
+            }
+
+            showPDFReady(pdfData) {
+                const messages = document.getElementById('messages');
+                const pdfDiv = document.createElement('div');
+                pdfDiv.className = 'pdf-ready';
+                pdfDiv.innerHTML = `
+                    <h3>📄 ¡Documento Generado Exitosamente!</h3>
+                    <p><strong>Archivo:</strong> ${pdfData.fileName}</p>
+                    <p><strong>Tamaño:</strong> ${Math.round(pdfData.size / 1024)} KB</p>
+                    <br>
+                    <button class="download-button" onclick="this.downloadPDF('${pdfData.base64}', '${pdfData.fileName}')">
+                        📥 Descargar PDF
+                    </button>
+                    <button class="download-button" onclick="this.viewPDF('${pdfData.base64}', '${pdfData.fileName}')">
+                        👁️ Ver PDF
+                    </button>
+                `;
+
+                // Agregar funciones de descarga al botón
+                pdfDiv.querySelector('button').onclick = () => this.downloadPDF(pdfData.base64, pdfData.fileName);
+                pdfDiv.querySelectorAll('button')[1].onclick = () => this.viewPDF(pdfData.base64, pdfData.fileName);
+
+                messages.appendChild(pdfDiv);
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            downloadPDF(base64Data, fileName) {
+                try {
+                    const byteCharacters = atob(base64Data);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'application/pdf' });
+                    
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName || 'documento.pdf';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    
+                    this.addMessage('✅ PDF descargado exitosamente', 'system');
+                } catch (error) {
+                    this.addMessage('❌ Error al descargar PDF: ' + error.message, 'system');
+                }
+            }
+
+            viewPDF(base64Data, fileName) {
+                try {
+                    const byteCharacters = atob(base64Data);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'application/pdf' });
+                    
+                    const url = URL.createObjectURL(blob);
+                    window.open(url, '_blank');
+                    
+                    setTimeout(() => URL.revokeObjectURL(url), 60000);
+                    this.addMessage('👁️ PDF abierto en nueva pestaña', 'system');
+                } catch (error) {
+                    this.addMessage('❌ Error al visualizar PDF: ' + error.message, 'system');
+                }
+            }
+
+            setProcessing(processing) {
+                this.isProcessing = processing;
+                const button = document.getElementById('sendButton');
+                const input = document.getElementById('messageInput');
+                const indicator = document.getElementById('typingIndicator');
+
+                button.disabled = processing;
+                input.disabled = processing;
+                
+                if (processing) {
+                    button.textContent = '...';
+                    indicator.style.display = 'flex';
+                } else {
+                    button.textContent = 'Enviar';
+                    indicator.style.display = 'none';
+                }
+            }
+        }
+
+        // Inicializar la aplicación
+        new AgentKitChat();
+    </script>
+</body>
+</html>
